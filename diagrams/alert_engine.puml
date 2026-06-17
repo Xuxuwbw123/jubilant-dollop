@@ -1,0 +1,80 @@
+@startuml 报警引擎流程
+' ============================================
+' 报警引擎 - 滑动窗口 + EMA + 三级判定
+' 来源: 项目规划书 5.4节
+' ============================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam defaultFontName Microsoft YaHei
+skinparam activityBackgroundColor #FFEBEE
+skinparam activityBorderColor #C62828
+
+title 报警引擎流程 — 滑动窗口 + EMA平滑 + 三级判定\n
+
+start
+
+:每帧分类结果\n(class_name, confidence, all_probs);
+
+:★ PredictionSmoother v2;
+
+partition "第1层: 多数投票" #E3F2FD {
+    :历史窗口 (5帧);
+    if (某类 ≥ 75%\n且与当前不同?) then (是)
+        :覆盖当前类别;
+    else (否)
+    endif
+}
+
+partition "第2层: EMA平滑" #E8F5E9 {
+    :EMA置信度 =\nα×当前 + (1-α)×历史;
+    note right
+      α = 0.4
+      平滑单帧抖动
+    end note
+}
+
+partition "第3层: Margin检查" #FFF9C4 {
+    if (Top1 - Top2\n< margin_threshold?) then (是)
+        :置信度打折\n(0.6 + 0.4×margin/阈值);
+        note right: 模型不确定时降低权重
+    else (否)
+    endif
+}
+
+:滑动窗口统计\n(15帧 ≈ 0.45秒);
+
+:计算严重度评分;
+note right
+  严重度 = 异常占比
+         × 平均置信度
+         × 类别权重
+end note
+
+:类别权重查询;
+note right
+  normal: 0.0
+  laugh: 0.5
+  disgust: 0.6
+  cry: 0.8
+  scream: 1.0
+end note
+
+if (严重度 ≥ 0.75?) then (是)
+    :🔴 危急 CRITICAL;
+    :触发报警 (冷却2秒);
+else if (严重度 ≥ 0.55?) then (是)
+    :🟠 警告 WARNING;
+    :触发报警 (冷却5秒);
+else if (严重度 ≥ 0.35?) then (是)
+    :🔵 预报警 PRE-ALERT;
+    :记录不触发;
+else (否)
+    :✓ 正常;
+endif
+
+:推送到 GUI + 仪表盘 + 报警历史;
+
+stop
+
+@enduml

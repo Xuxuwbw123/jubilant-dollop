@@ -1,0 +1,72 @@
+@startuml CNN模型结构
+' ============================================
+' AudioCNN v3 模型架构
+' 来源: 项目规划书 5.2节
+' ============================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 10
+skinparam defaultFontName Microsoft YaHei
+skinparam componentBackgroundColor #E8EAF6
+skinparam databaseBackgroundColor #C5CAE9
+skinparam nodeBackgroundColor #F3E5F5
+
+title AudioCNN v3 — 2D卷积神经网络结构 (423,173 参数)\n
+
+package "输入层" #E8F5E9 {
+    [Input: (B, 3, 128, 32)\n3通道梅尔频谱图] as input
+}
+
+package "特征提取阶段" #E3F2FD {
+    [Conv1: Conv2d(3→32, 3×3)\n+ BatchNorm + ReLU\n→ (B, 32, 128, 32)] as conv1
+    [Conv2: Conv2d(32→64, 3×3)\n+ BatchNorm + ReLU\n+ MaxPool2d(2×2)\n→ (B, 64, 64, 16)] as conv2
+    [Conv3: Conv2d(64→128, 3×3)\n+ BatchNorm + ReLU\n→ (B, 128, 64, 16)] as conv3
+    [Conv4: Conv2d(128→256, 3×3)\n+ BatchNorm + ReLU\n+ MaxPool2d(2×2)\n→ (B, 256, 32, 8)] as conv4
+}
+
+package "全局池化" #FFF9C4 {
+    [AdaptiveAvgPool2d(1)\n+ Flatten\n→ (B, 256)] as gap
+}
+
+package "分类头" #FFE0B2 {
+    [FC1: Linear(256→128)\n+ BatchNorm + ReLU\n+ Dropout(0.5)\n→ (B, 128)] as fc1
+    [FC2: Linear(128→5)\n→ (B, 5)] as fc2
+}
+
+package "输出" #FFCDD2 {
+    [Softmax\n→ 5类概率\nnormal/scream/cry/laugh/disgust] as output
+}
+
+input --> conv1
+conv1 --> conv2
+conv2 --> conv3
+conv3 --> conv4
+conv4 --> gap
+gap --> fc1
+fc1 --> fc2
+fc2 --> output
+
+note right of conv1
+  参数量: 896
+end note
+note right of conv2
+  参数量: 18,496
+end note
+note right of conv3
+  参数量: 73,856
+end note
+note right of conv4
+  参数量: 295,168
+end note
+note right of fc1
+  参数量: 32,896
+end note
+note right of fc2
+  参数量: 645
+end note
+note right of input
+  总计: 423,173 参数
+  ~1.7MB (float32)
+end note
+
+@enduml

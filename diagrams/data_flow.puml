@@ -1,0 +1,83 @@
+@startuml 音频数据流详解
+' ============================================
+' 音频处理流水线 - 从原始音频到分类结果
+' 来源: 项目规划书 3.3节
+' ============================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam defaultFontName Microsoft YaHei
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityBorderColor #1565C0
+
+title 音频数据流详解 — 从原始音频到报警输出\n
+
+start
+
+:原始音频输入\n(16kHz, mono, int16);
+
+:频谱平坦度检测\n(Wiener Entropy);
+
+if (flatness > 0.65?) then (是)
+  :判定为静音/白噪声;
+  :跳过模型推理\n直接输出 normal;
+  stop
+else (否 → 有人声)
+endif
+
+:3通道梅尔频谱图提取\nlibrosa.feature.melspectrogram();
+note right
+  Channel 0: static mel (dB)
+  Channel 1: Δ 一阶差分 (速度)
+  Channel 2: ΔΔ 二阶差分 (加速度)
+  输出维度: (3, 128, n_frames)
+end note
+
+:时间维度对齐\npad/crop → 32 frames;
+note right
+  n_frames < 32: edge padding
+  n_frames > 32: center crop
+  最终: (3, 128, 32)
+end note
+
+fork
+  :CNN 通路 (本地);
+  :2D-CNN 前向推理\nAudioCNN v3 (423K参数);
+  :5类 Softmax 概率;
+fork again
+  :Omni 通路 (云端);
+  :2秒音频缓冲\n→ WAV base64;
+  :Qwen3.5-Omni-Flash API;
+  :7类情绪 + 危险评分\n+ 转写文本;
+end fork
+
+:双通路融合判定\n(CNN声学 + Omni语义);
+
+:预测平滑 (PredictionSmoother v2);
+note right
+  ① 多数投票 (75%门槛) → 类别判定
+  ② EMA平滑 (α=0.4) → 置信度平滑
+  ③ Margin检查 → 对不确定结果折扣
+end note
+
+:报警引擎;
+note right
+  严重度 = 异常占比 × 置信度 × 类别权重
+  scream(1.0) > cry(0.8) > disgust(0.6) > laugh(0.5)
+end note
+
+if (严重度 ≥ 0.75?) then (是)
+  :🔴 危急报警\n(冷却2秒);
+else if (严重度 ≥ 0.55?) then (是)
+  :🟡 警告报警\n(冷却8秒);
+else if (严重度 ≥ 0.35?) then (是)
+  :🔵 预报警;
+else
+  :不报警;
+endif
+
+:推送结果到展示终端\n(PyQt5 GUI + HTML仪表盘 + WS推送);
+
+stop
+
+@enduml

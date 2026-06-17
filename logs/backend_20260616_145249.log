@@ -1,0 +1,464 @@
+14:52:50 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+14:52:50 [INFO] backend: ==================================================
+14:52:50 [INFO] backend: 后端启动: 双机实时音频监测系统
+14:52:50 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+14:52:50 [INFO] backend: 模拟模式: 关
+14:52:50 [INFO] backend: Omni 智能体: 启用
+14:52:50 [INFO] backend: ==================================================
+14:52:50 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+14:52:50 [INFO] backend:   >>> ws://10.10.125.66:8765
+14:52:52 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+14:52:52 [INFO] backend.classifier: CUDA 可用，将使用 GPU 加速
+14:52:52 [INFO] backend.classifier: 检测到模型架构: emotion2vec_classifier
+14:52:52 [INFO] backend.classifier: 模型加载成功 (emotion2vec_classifier, device=cuda): models/best_model_e2v.pt
+14:52:52 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+14:52:52 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+14:52:52 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+14:52:52 [INFO] backend: 正在预热 CNN 模型 (首次推理较慢, 请稍候)...
+14:53:31 [INFO] backend.classifier: emotion2vec 原生情绪模型加载成功 (device=cuda)
+14:53:31 [INFO] backend: CNN 模型预热完成 (38.7s)
+14:53:31 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+14:53:31 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+14:53:31 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+14:53:31 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+14:53:31 [INFO] backend: 后端流水线已就绪，等待前端连接...
+14:53:31 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+14:53:31 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+14:53:31 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+14:53:31 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+14:53:43 [INFO] backend.http: [API/Omni] 收到文件: recording_2026-06-16T06-53-43-399Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpe9u9trd7.webm
+14:53:45 [INFO] backend.file_handler: librosa 加载成功: 7.3s, sr=16000
+14:53:45 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+14:53:48 [INFO] backend.http: [API/Omni] 分析完成: 惊讶 | 正常 | 2.2s
+14:53:59 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T06-53-58-982Z.webm -> C:\Users\44390\AppData\Local\Temp\tmposmxufen.webm
+14:53:59 [INFO] backend.file_handler: librosa 加载成功: 5.9s, sr=16000
+14:53:59 [INFO] backend.file_handler: librosa 加载成功: 5.9s, sr=16000
+14:54:00 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=79.99%
+14:54:29 [INFO] backend.http: [API/Omni] 收到文件: recording_2026-06-16T06-54-29-109Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp98fww3bi.webm
+14:54:29 [INFO] backend.file_handler: librosa 加载成功: 4.6s, sr=16000
+14:54:29 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+14:54:30 [INFO] backend.http: [API/Omni] 分析完成: 惊讶 | 危险 | 1.4s
+14:54:49 [INFO] backend.http: [API/Omni] 收到文件: recording_2026-06-16T06-54-49-359Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp8e0uh3ji.webm
+14:54:49 [INFO] backend.file_handler: librosa 加载成功: 3.2s, sr=16000
+14:54:49 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+14:54:53 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 3.9s
+14:55:31 [INFO] backend.http: [API] 收到文件: scream13.m4a -> C:\Users\44390\AppData\Local\Temp\tmp0_xne2rv.m4a
+14:55:31 [INFO] backend.file_handler: librosa 加载成功: 3.9s, sr=16000
+14:55:31 [INFO] backend.file_handler: librosa 加载成功: 3.9s, sr=16000
+14:55:32 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=99.73%
+15:02:51 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-02-51-624Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpp9o500q0.webm
+15:02:51 [INFO] backend.file_handler: librosa 加载成功: 0.7s, sr=16000
+15:02:51 [INFO] backend.file_handler: librosa 加载成功: 0.7s, sr=16000
+15:02:52 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=100.00%
+15:17:28 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-17-28-147Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpz0i6nm70.webm
+15:17:28 [INFO] backend.file_handler: librosa 加载成功: 4.4s, sr=16000
+15:17:28 [INFO] backend.file_handler: librosa 加载成功: 4.4s, sr=16000
+15:17:29 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=90.43%
+15:17:34 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-17-33-979Z.webm -> C:\Users\44390\AppData\Local\Temp\tmprmgvlpta.webm
+15:17:34 [INFO] backend.file_handler: librosa 加载成功: 2.8s, sr=16000
+15:17:34 [INFO] backend.file_handler: librosa 加载成功: 2.8s, sr=16000
+15:17:34 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=98.02%
+15:17:42 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-17-42-571Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpc5cpf17w.webm
+15:17:42 [INFO] backend.file_handler: librosa 加载成功: 6.5s, sr=16000
+15:17:42 [INFO] backend.file_handler: librosa 加载成功: 6.5s, sr=16000
+15:17:44 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=92.77%
+15:17:53 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-17-53-096Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp15tbrmck.webm
+15:17:53 [INFO] backend.file_handler: librosa 加载成功: 7.6s, sr=16000
+15:17:53 [INFO] backend.file_handler: librosa 加载成功: 7.6s, sr=16000
+15:17:54 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=90.93%
+15:18:01 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-01-352Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpgkesmuxw.webm
+15:18:01 [INFO] backend.file_handler: librosa 加载成功: 5.2s, sr=16000
+15:18:01 [INFO] backend.file_handler: librosa 加载成功: 5.2s, sr=16000
+15:18:03 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=82.24%
+15:18:16 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-15-810Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpop7el_kq.webm
+15:18:16 [INFO] backend.file_handler: librosa 加载成功: 11.5s, sr=16000
+15:18:16 [INFO] backend.file_handler: librosa 加载成功: 11.5s, sr=16000
+15:18:19 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=79.43%
+15:18:22 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-22-424Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpvnibf5na.webm
+15:18:22 [INFO] backend.file_handler: librosa 加载成功: 2.2s, sr=16000
+15:18:22 [INFO] backend.file_handler: librosa 加载成功: 2.2s, sr=16000
+15:18:23 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=100.00%
+15:18:26 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-25-886Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpxl43gfu9.webm
+15:18:26 [INFO] backend.file_handler: librosa 加载成功: 1.7s, sr=16000
+15:18:26 [INFO] backend.file_handler: librosa 加载成功: 1.7s, sr=16000
+15:18:26 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=81.22%
+15:18:28 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-27-989Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp36wamhlx.webm
+15:18:28 [INFO] backend.file_handler: librosa 加载成功: 0.1s, sr=16000
+15:18:28 [INFO] backend.file_handler: librosa 加载成功: 0.1s, sr=16000
+15:18:28 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+15:18:32 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-31-721Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpjyuey2ci.webm
+15:18:32 [INFO] backend.file_handler: librosa 加载成功: 2.3s, sr=16000
+15:18:32 [INFO] backend.file_handler: librosa 加载成功: 2.3s, sr=16000
+15:18:32 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=99.97%
+15:18:35 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-35-696Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp1zd2bqkw.webm
+15:18:35 [INFO] backend.file_handler: librosa 加载成功: 1.7s, sr=16000
+15:18:35 [INFO] backend.file_handler: librosa 加载成功: 1.7s, sr=16000
+15:18:36 [ERROR] backend.alert: !!! 危急报警: [危急] 异常声音: 尖叫 | 异常占比: 83% | 置信度: 0.96 | 严重度: 0.80 | 趋势: →平稳
+15:18:36 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=100.00%
+15:18:40 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-40-233Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpjbpiowa2.webm
+15:18:40 [INFO] backend.file_handler: librosa 加载成功: 3.1s, sr=16000
+15:18:40 [INFO] backend.file_handler: librosa 加载成功: 3.1s, sr=16000
+15:18:41 [ERROR] backend.alert: !!! 危急报警: [危急] 异常声音: 尖叫 | 异常占比: 86% | 置信度: 0.97 | 严重度: 0.83 | 趋势: →平稳
+15:18:41 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=99.99%
+15:18:46 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-46-012Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp_n0aq27z.webm
+15:18:46 [INFO] backend.file_handler: librosa 加载成功: 3.8s, sr=16000
+15:18:46 [INFO] backend.file_handler: librosa 加载成功: 3.8s, sr=16000
+15:18:47 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=99.95%
+15:18:55 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-18-54-657Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpba3v0nt6.webm
+15:18:55 [INFO] backend.file_handler: librosa 加载成功: 6.6s, sr=16000
+15:18:55 [INFO] backend.file_handler: librosa 加载成功: 6.6s, sr=16000
+15:18:56 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=82.62%
+15:19:00 [INFO] backend.http: [API] 收到文件: recording_2026-06-16T07-19-00-743Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpndwn5ebw.webm
+15:19:00 [INFO] backend.file_handler: librosa 加载成功: 3.4s, sr=16000
+15:19:00 [INFO] backend.file_handler: librosa 加载成功: 3.4s, sr=16000
+15:19:01 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=75.70%
+15:19:08 [INFO] backend.http: [API] 收到文件: 1002_TAI_ANG_XX.wav -> C:\Users\44390\AppData\Local\Temp\tmp9kv0nk1a.wav
+15:19:09 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:19:09 [ERROR] backend.file_handler: soundfile 也失败: Error opening 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp9kv0nk1a.wav': Format not recognised.
+15:19:09 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:19:09 [ERROR] backend.file_handler: soundfile 也失败: Error opening 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp9kv0nk1a.wav': Format not recognised.
+15:19:09 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:19:17 [INFO] backend.http: [API] 收到文件: val_scream_2240c6_216.wav -> C:\Users\44390\AppData\Local\Temp\tmp18igh2bt.wav
+15:19:17 [INFO] backend.file_handler: librosa 加载成功: 1.4s, sr=16000
+15:19:17 [INFO] backend.file_handler: librosa 加载成功: 1.4s, sr=16000
+15:19:17 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=71.67%
+15:19:26 [INFO] backend.http: [API] 收到文件: val_scream_deacd4_207.wav -> C:\Users\44390\AppData\Local\Temp\tmpuwjuk7yo.wav
+15:19:26 [INFO] backend.file_handler: librosa 加载成功: 3.1s, sr=16000
+15:19:26 [INFO] backend.file_handler: librosa 加载成功: 3.1s, sr=16000
+15:19:27 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 90% | 置信度: 0.92 | 严重度: 0.42 | 趋势: →平稳
+15:19:27 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=75.73%
+15:24:05 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-05-643Z.webm -> C:\Users\44390\AppData\Local\Temp\tmps5234s1_.webm
+15:24:05 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:24:05 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:24:05 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 91% | 置信度: 0.93 | 严重度: 0.42 | 趋势: →平稳
+15:24:05 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=98.52%
+15:24:07 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-07-684Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpdk4yojqo.webm
+15:24:08 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:08 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpdk4yojqo.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp7vxj0uac.wav']' returned non-zero exit status 3199971767.
+15:24:08 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:08 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpdk4yojqo.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpiw4bqdh9.wav']' returned non-zero exit status 3199971767.
+15:24:08 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:24:09 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-09-723Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp793civ5f.webm
+15:24:09 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:09 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp793civ5f.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp8zcnj2jl.wav']' returned non-zero exit status 3199971767.
+15:24:09 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:09 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp793civ5f.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp66qlyxnt.wav']' returned non-zero exit status 3199971767.
+15:24:09 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:24:12 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-11-763Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpugbsj435.webm
+15:24:12 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:12 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpugbsj435.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpt1kbqxjk.wav']' returned non-zero exit status 3199971767.
+15:24:12 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:12 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpugbsj435.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpkuuv3jbu.wav']' returned non-zero exit status 3199971767.
+15:24:12 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:24:13 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-13-804Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp4e9kq0dm.webm
+15:24:13 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:13 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp4e9kq0dm.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpfmryqeop.wav']' returned non-zero exit status 3199971767.
+15:24:13 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:14 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp4e9kq0dm.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpx6ejaxx1.wav']' returned non-zero exit status 3199971767.
+15:24:14 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:24:16 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-15-844Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpr378v434.webm
+15:24:16 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:16 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpr378v434.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmps761vbjg.wav']' returned non-zero exit status 3199971767.
+15:24:16 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:16 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpr378v434.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpjbuge8ca.wav']' returned non-zero exit status 3199971767.
+15:24:16 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:24:17 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-17-884Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp32zjfcwx.webm
+15:24:17 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:17 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp32zjfcwx.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmphnawo81s.wav']' returned non-zero exit status 3199971767.
+15:24:18 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:18 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp32zjfcwx.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpdl2am30f.wav']' returned non-zero exit status 3199971767.
+15:24:18 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:24:20 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-19-924Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpvbp0ou9l.webm
+15:24:20 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:20 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpvbp0ou9l.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpfe0xixk8.wav']' returned non-zero exit status 3199971767.
+15:24:20 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:20 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpvbp0ou9l.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpnm5v9zjh.wav']' returned non-zero exit status 3199971767.
+15:24:20 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:24:21 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-24-21-967Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp8w3cq7pc.webm
+15:24:22 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:22 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp8w3cq7pc.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp_7vijezu.wav']' returned non-zero exit status 3199971767.
+15:24:22 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:24:22 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp8w3cq7pc.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmphe0l6fd2.wav']' returned non-zero exit status 3199971767.
+15:24:22 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:25:10 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+15:29:21 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-21-919Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpaoi56_fg.webm
+15:29:22 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:22 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:22 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 92% | 置信度: 0.93 | 严重度: 0.43 | 趋势: →平稳
+15:29:22 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=95.14%
+15:29:24 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-23-960Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpzo9q1o46.webm
+15:29:24 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:24 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpzo9q1o46.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp_04hqh09.wav']' returned non-zero exit status 3199971767.
+15:29:24 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:24 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpzo9q1o46.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpqszslf8s.wav']' returned non-zero exit status 3199971767.
+15:29:24 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:29:26 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-26-000Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp53tvtqmx.webm
+15:29:26 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:26 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp53tvtqmx.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpdd9n52b9.wav']' returned non-zero exit status 3199971767.
+15:29:26 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:26 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp53tvtqmx.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpibmyaprf.wav']' returned non-zero exit status 3199971767.
+15:29:26 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:29:28 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-28-040Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpx30g0yb_.webm
+15:29:28 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:28 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpx30g0yb_.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpnzl63ttr.wav']' returned non-zero exit status 3199971767.
+15:29:28 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:28 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpx30g0yb_.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpfi7mtao1.wav']' returned non-zero exit status 3199971767.
+15:29:28 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:29:30 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-30-080Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp1tdmujvm.webm
+15:29:30 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:30 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp1tdmujvm.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmpp0sm5gh5.wav']' returned non-zero exit status 3199971767.
+15:29:30 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+15:29:30 [ERROR] backend.file_handler: ffmpeg 提取失败: Command '['ffmpeg', '-y', '-i', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp1tdmujvm.webm', '-ar', '16000', '-ac', '1', '-f', 'wav', 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp19bhog43.wav']' returned non-zero exit status 3199971767.
+15:29:30 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+15:29:53 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-53-912Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpnc60248d.webm
+15:29:54 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:54 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:54 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=67.69%
+15:29:56 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-55-916Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpff7jysay.webm
+15:29:56 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:56 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:56 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=48.73%
+15:29:57 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-57-919Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpq94npsjs.webm
+15:29:58 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:58 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:29:58 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=99.99%
+15:30:00 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-29-59-921Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpx156oyh3.webm
+15:30:00 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:00 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:00 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=100.00%
+15:30:01 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-01-923Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpaiy733pc.webm
+15:30:02 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:02 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:02 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=100.00%
+15:30:04 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-03-928Z.webm -> C:\Users\44390\AppData\Local\Temp\tmps2dmtsbe.webm
+15:30:04 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:04 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:04 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=54.33%
+15:30:05 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-05-931Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpaoyqf8lx.webm
+15:30:06 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:06 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:06 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 92% | 置信度: 0.93 | 严重度: 0.43 | 趋势: →平稳
+15:30:06 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=88.08%
+15:30:08 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-07-934Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp6q00hdbo.webm
+15:30:08 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:08 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:08 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+15:30:09 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-09-938Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp3235t44i.webm
+15:30:10 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:10 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:10 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=100.00%
+15:30:12 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-11-941Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpxpula2i8.webm
+15:30:12 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:12 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:12 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 93% | 置信度: 0.93 | 严重度: 0.43 | 趋势: →平稳
+15:30:12 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=95.17%
+15:30:13 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-13-943Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp1j0lf1pk.webm
+15:30:14 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:14 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:14 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=59.62%
+15:30:16 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-15-946Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp_v4fpanx.webm
+15:30:16 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:16 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:16 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=92.53%
+15:30:17 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-17-948Z.webm -> C:\Users\44390\AppData\Local\Temp\tmprq2ea2rr.webm
+15:30:18 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:18 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:18 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+15:30:20 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-19-949Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp7dav_0ir.webm
+15:30:20 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:20 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:20 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+15:30:21 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-21-952Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpkf13x6my.webm
+15:30:22 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:22 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:22 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+15:30:23 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-30-23-044Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpnvuj0nbu.webm
+15:30:23 [INFO] backend.file_handler: librosa 加载成功: 1.1s, sr=16000
+15:30:23 [INFO] backend.file_handler: librosa 加载成功: 1.1s, sr=16000
+15:30:23 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=56.57%
+15:30:27 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-27-020Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpfdlf_fsa.webm
+15:30:27 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:27 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:28 [INFO] backend.http: [API/Omni] 分析完成: 惊讶 | 正常 | 1.1s
+15:30:29 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-29-024Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpdfvdymsc.webm
+15:30:29 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:29 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:30 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 0.9s
+15:30:31 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-31-028Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpn9wq9unv.webm
+15:30:31 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:31 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:32 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.0s
+15:30:33 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-33-032Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpvgw47tvy.webm
+15:30:33 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:33 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:34 [INFO] backend.http: [API/Omni] 分析完成: 愤怒 | 危险 | 1.1s
+15:30:34 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 93% | 置信度: 0.92 | 严重度: 0.43 | 趋势: →平稳
+15:30:35 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-35-036Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpu_v5v920.webm
+15:30:35 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:35 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:36 [INFO] backend.http: [API/Omni] 分析完成: 愤怒 | 危险 | 1.1s
+15:30:37 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-37-040Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpe37_nzia.webm
+15:30:37 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:37 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:38 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.2s
+15:30:39 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-39-044Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpgwc16a7u.webm
+15:30:39 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:39 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:40 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.4s
+15:30:41 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-41-048Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpn8_c6cme.webm
+15:30:41 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:41 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:42 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.2s
+15:30:43 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-43-049Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp094uuj2g.webm
+15:30:43 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:43 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:44 [INFO] backend.http: [API/Omni] 分析完成: 惊讶 | 正常 | 1.2s
+15:30:45 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-45-051Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpho6l659l.webm
+15:30:45 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:45 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:46 [INFO] backend.http: [API/Omni] 分析完成: 愤怒 | 正常 | 1.2s
+15:30:47 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-47-055Z.webm -> C:\Users\44390\AppData\Local\Temp\tmprqzcgf7s.webm
+15:30:47 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:47 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:48 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.1s
+15:30:49 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-49-058Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpfdgmwy3p.webm
+15:30:49 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:30:49 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:49 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-30-49-412Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpg8jlqw_g.webm
+15:30:49 [INFO] backend.file_handler: librosa 加载成功: 0.3s, sr=16000
+15:30:49 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:30:50 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 0.8s
+15:30:50 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.3s
+15:31:18 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-31-18-760Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpza0jnghc.webm
+15:31:18 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:18 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:31:20 [INFO] backend.http: [API/Omni] 分析完成: 愤怒 | 危险 | 1.4s
+15:31:21 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-31-20-764Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpi_xuf9en.webm
+15:31:21 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:21 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:31:22 [INFO] backend.http: [API/Omni] 分析完成: 愤怒 | 正常 | 1.5s
+15:31:22 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-31-22-767Z.webm -> C:\Users\44390\AppData\Local\Temp\tmptj30b9jg.webm
+15:31:22 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:22 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:31:24 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.3s
+15:31:25 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-31-24-772Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp76cktg27.webm
+15:31:25 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:25 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:31:26 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.2s
+15:31:26 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-31-26-775Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp_lwdob2b.webm
+15:31:26 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:26 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:31:28 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.4s
+15:31:29 [INFO] backend.http: [API/Omni] 收到文件: chunk_2026-06-16T07-31-28-699Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp4ihdl3s_.webm
+15:31:29 [INFO] backend.file_handler: librosa 加载成功: 1.9s, sr=16000
+15:31:29 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+15:31:30 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 1.2s
+15:31:34 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-34-970Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpfp1lmr7k.webm
+15:31:35 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:35 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:35 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=89.60%
+15:31:37 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-36-974Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpccs8cl3r.webm
+15:31:37 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:37 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:37 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=99.47%
+15:31:39 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-38-978Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp1c3z3iwg.webm
+15:31:39 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:39 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:39 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=96.40%
+15:31:41 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-40-980Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp9uyhzo78.webm
+15:31:41 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:41 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:41 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 100% | 置信度: 0.90 | 严重度: 0.45 | 趋势: →平稳
+15:31:41 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=84.69%
+15:31:42 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-42-982Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp35zvmlpz.webm
+15:31:43 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:43 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:43 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=71.68%
+15:31:45 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-44-983Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpfgzf3hto.webm
+15:31:45 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:45 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:45 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=47.99%
+15:31:46 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-46-985Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpprrsmom0.webm
+15:31:47 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:47 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:47 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 93% | 置信度: 0.87 | 严重度: 0.41 | 趋势: →平稳
+15:31:47 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=100.00%
+15:31:49 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-48-988Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpk84i7g3w.webm
+15:31:49 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:49 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:49 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=96.19%
+15:31:51 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-50-990Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp7qd7t7iv.webm
+15:31:51 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:51 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:51 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=100.00%
+15:31:52 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-52-991Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp_mrzamw1.webm
+15:31:53 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:53 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:53 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 93% | 置信度: 0.89 | 严重度: 0.42 | 趋势: →平稳
+15:31:53 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=84.04%
+15:31:55 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-54-996Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpewne0ocg.webm
+15:31:55 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:55 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:55 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+15:31:57 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-56-999Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpfvk50ojq.webm
+15:31:57 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:57 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:57 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=99.97%
+15:31:59 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-31-59-003Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp6cpk3byn.webm
+15:31:59 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:59 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:31:59 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=69.56%
+15:32:01 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-01-007Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpbeysd219.webm
+15:32:01 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:01 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:01 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=97.45%
+15:32:03 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-03-011Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpq8booykj.webm
+15:32:03 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:03 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:03 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 93% | 置信度: 0.89 | 严重度: 0.42 | 趋势: →平稳
+15:32:03 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=99.99%
+15:32:05 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-05-014Z.webm -> C:\Users\44390\AppData\Local\Temp\tmptogp8529.webm
+15:32:05 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:05 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:05 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=91.24%
+15:32:07 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-07-018Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpohnc4fod.webm
+15:32:07 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:07 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:07 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=75.17%
+15:32:09 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-09-022Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpxfsnjnq7.webm
+15:32:09 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:09 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:09 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=97.28%
+15:32:11 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-11-024Z.webm -> C:\Users\44390\AppData\Local\Temp\tmplw94q5ze.webm
+15:32:11 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:11 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:11 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 93% | 置信度: 0.88 | 严重度: 0.41 | 趋势: →平稳
+15:32:11 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=94.49%
+15:32:13 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-13-030Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpaxhfuogb.webm
+15:32:13 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:13 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:13 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=97.73%
+15:32:15 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-15-033Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp9eqxza7d.webm
+15:32:15 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:15 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:15 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=89.85%
+15:32:17 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-17-037Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpaf5n3q36.webm
+15:32:17 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:17 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:17 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+15:32:19 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-19-041Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpy7_uij4m.webm
+15:32:19 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:19 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:19 [INFO] backend.alert: ! 预报警: [预报警] 异常声音: 大笑 | 异常占比: 93% | 置信度: 0.91 | 严重度: 0.42 | 趋势: →平稳
+15:32:19 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=87.38%
+15:32:21 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-21-045Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpzb09xfh5.webm
+15:32:21 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:21 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+15:32:21 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=100.00%
+15:32:22 [INFO] backend.http: [API] 收到文件: chunk_2026-06-16T07-32-22-170Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpbllyudcy.webm
+15:32:22 [INFO] backend.file_handler: librosa 加载成功: 1.1s, sr=16000
+15:32:22 [INFO] backend.file_handler: librosa 加载成功: 1.1s, sr=16000
+15:32:22 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+16:30:30 [INFO] backend.gui: GUI 窗口已关闭
+16:30:30 [INFO] backend.receiver: WebSocket 服务器已停止
+16:30:30 [INFO] backend: 后端已停止

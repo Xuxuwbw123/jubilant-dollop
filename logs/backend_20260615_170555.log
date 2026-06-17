@@ -1,0 +1,46 @@
+17:05:55 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+17:05:55 [INFO] backend: ==================================================
+17:05:55 [INFO] backend: 后端启动: 双机实时音频监测系统
+17:05:55 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+17:05:55 [INFO] backend: 模拟模式: 关
+17:05:55 [INFO] backend: Omni 智能体: 启用
+17:05:55 [INFO] backend: ==================================================
+17:05:55 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+17:05:55 [INFO] backend:   >>> ws://10.10.125.66:8765
+17:05:56 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+17:05:56 [INFO] backend.classifier: CUDA 可用，将使用 GPU 加速
+17:05:56 [INFO] backend.classifier: 检测到模型架构: emotion2vec_classifier
+17:05:56 [INFO] backend.classifier: 模型加载成功 (emotion2vec_classifier, device=cuda): models/best_model_e2v.pt
+17:05:57 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+17:05:57 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+17:05:57 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+17:05:57 [INFO] backend: 正在预热 CNN 模型 (首次推理较慢, 请稍候)...
+17:06:14 [INFO] backend.classifier: emotion2vec 原生情绪模型加载成功 (device=cuda)
+17:06:14 [INFO] backend: CNN 模型预热完成 (17.9s)
+17:06:14 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+17:06:14 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+17:06:14 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+17:06:14 [INFO] backend: 后端流水线已就绪，等待前端连接...
+17:06:14 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+17:06:14 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+17:06:14 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+17:06:14 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+17:06:14 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+17:12:57 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+17:15:03 [INFO] backend.http: [API] 收到文件: 1001_IOM_ANG_XX.wav -> C:\Users\44390\AppData\Local\Temp\tmp30mnd5c5.wav
+17:15:04 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+17:15:04 [ERROR] backend.file_handler: soundfile 也失败: Error opening 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp30mnd5c5.wav': Format not recognised.
+17:15:04 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+17:15:04 [ERROR] backend.file_handler: soundfile 也失败: Error opening 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp30mnd5c5.wav': Format not recognised.
+17:15:04 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+17:15:09 [INFO] backend.http: [API] 收到文件: 1001_IOM_ANG_XX.wav -> C:\Users\44390\AppData\Local\Temp\tmp6pbunc2j.wav
+17:15:10 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+17:15:10 [ERROR] backend.file_handler: soundfile 也失败: Error opening 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp6pbunc2j.wav': Format not recognised.
+17:15:10 [WARNING] backend.file_handler: librosa 加载失败 ()，尝试 soundfile...
+17:15:10 [ERROR] backend.file_handler: soundfile 也失败: Error opening 'C:\\Users\\44390\\AppData\\Local\\Temp\\tmp6pbunc2j.wav': Format not recognised.
+17:15:10 [INFO] backend.http: [API] 分析完成: 主导=None, 置信度=0.00%
+17:15:42 [INFO] backend.http: [API] 收到文件: val_scream_c56636_210.wav -> C:\Users\44390\AppData\Local\Temp\tmp0b7fpiva.wav
+17:15:42 [INFO] backend.file_handler: librosa 加载成功: 3.4s, sr=16000
+17:15:42 [INFO] backend.file_handler: librosa 加载成功: 3.4s, sr=16000
+17:15:43 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=78.08%
+17:17:20 [INFO] backend.gui: GUI 窗口已关闭

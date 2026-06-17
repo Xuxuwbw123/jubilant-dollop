@@ -1,0 +1,14 @@
+16:25:06 [INFO] backend: ==================================================
+16:25:06 [INFO] backend: 后端启动: 双机实时音频监测系统
+16:25:06 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+16:25:06 [INFO] backend: 模拟模式: 关
+16:25:06 [INFO] backend: ==================================================
+16:25:06 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+16:25:06 [INFO] backend:   >>> ws://10.10.125.66:8765
+16:25:08 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+16:25:08 [WARNING] backend.classifier: 模型文件不存在: models/best_model.pt，使用模拟模式
+16:25:08 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+16:25:08 [INFO] backend.http: HTTP 仪表盘服务: http://localhost:8080/
+16:25:08 [INFO] backend: 后端流水线已就绪，等待前端连接...
+16:25:08 [INFO] backend.http: 音频文件分析 API (MP3/WAV): POST http://localhost:8080/api/analyze
+16:25:08 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766

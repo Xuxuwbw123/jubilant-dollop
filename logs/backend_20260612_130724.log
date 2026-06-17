@@ -1,0 +1,41 @@
+13:07:24 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+13:07:24 [INFO] backend: ==================================================
+13:07:24 [INFO] backend: 后端启动: 双机实时音频监测系统
+13:07:24 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+13:07:24 [INFO] backend: 模拟模式: 关
+13:07:24 [INFO] backend: Omni 智能体: 启用
+13:07:24 [INFO] backend: ==================================================
+13:07:24 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+13:07:24 [INFO] backend:   >>> ws://10.10.125.66:8765
+13:07:25 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+13:07:25 [INFO] backend.classifier: 检测到模型架构: emotion2vec_classifier
+13:07:25 [INFO] backend.classifier: 模型加载成功 (emotion2vec_classifier): models/best_model.pt
+13:07:26 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+13:07:26 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+13:07:26 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+13:07:26 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+13:07:26 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+13:07:26 [INFO] backend: 后端流水线已就绪，等待前端连接...
+13:07:26 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+13:07:26 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+13:07:26 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+13:07:26 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+13:07:26 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+13:07:26 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+13:07:26 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+13:07:53 [INFO] backend.http: [API] 收到文件: test.wav -> C:\Users\44390\AppData\Local\Temp\tmpis2ut2i1.wav
+13:07:56 [INFO] backend.file_handler: librosa 加载成功: 3.0s, sr=16000
+13:07:56 [INFO] backend.file_handler: librosa 加载成功: 3.0s, sr=16000
+13:08:12 [INFO] backend.classifier: emotion2vec 原生情绪模型加载成功
+13:08:12 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=82.16%
+13:08:40 [INFO] backend.http: [API/Omni] 收到文件: test.wav -> C:\Users\44390\AppData\Local\Temp\tmp98wj0is2.wav
+13:08:40 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+13:08:40 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+13:08:58 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 17.2s
+13:26:12 [INFO] backend.http: [API] 收到文件: 录音机-20260609-2001.wav -> C:\Users\44390\AppData\Local\Temp\tmp89b26hcn.wav
+13:26:12 [INFO] backend.file_handler: librosa 加载成功: 16.9s, sr=16000
+13:26:12 [INFO] backend.file_handler: librosa 加载成功: 16.9s, sr=16000
+13:26:16 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=98.78%
+13:26:33 [INFO] backend.gui: GUI 窗口已关闭
+13:26:33 [INFO] backend.receiver: WebSocket 服务器已停止
+13:26:33 [INFO] backend: 后端已停止

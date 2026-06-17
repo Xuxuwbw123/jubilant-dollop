@@ -1,0 +1,17 @@
+11:14:11 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+11:14:11 [INFO] backend: ==================================================
+11:14:11 [INFO] backend: 后端启动: 双机实时音频监测系统
+11:14:11 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+11:14:11 [INFO] backend: 模拟模式: 开
+11:14:11 [INFO] backend: Omni 智能体: 禁用
+11:14:11 [INFO] backend: ==================================================
+11:14:11 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+11:14:11 [INFO] backend:   >>> ws://10.10.125.66:8765
+11:14:12 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+11:14:12 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+11:14:12 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+11:14:12 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+11:14:12 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+11:14:12 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+11:14:12 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+11:14:12 [INFO] backend.receiver: WebSocket 服务器已停止

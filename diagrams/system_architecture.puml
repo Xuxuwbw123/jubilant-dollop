@@ -1,0 +1,72 @@
+@startuml 系统整体架构图
+' ============================================
+' 双机实时音频监测系统 - 整体架构图
+' 来源: 项目规划书 3.1节
+' ============================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam defaultFontName Microsoft YaHei
+skinparam arrowColor #555555
+skinparam rectangleBorderColor #333333
+skinparam rectangleBackgroundColor #F0F4FF
+
+title 双机实时音频远程监测与异常分析系统 — 整体架构图\n
+
+left to right direction
+
+package "前端 (采集端)" as frontend #E8F5E9 {
+    [麦克风\n16kHz/mono] as mic #C8E6C9
+    [VAD\n静音过滤] as vad #C8E6C9
+    [实时模式:\nWebSocket] as ws_client #C8E6C9
+    [文件模式:\nHTTP POST] as http_client #C8E6C9
+
+    mic --> vad
+    vad --> ws_client
+    vad --> http_client
+}
+
+package "后端 (处理端)" as backend #E3F2FD {
+    rectangle "WebSocket Server\n(:8765)" as ws_server #BBDEFB
+    rectangle "HTTP Server\n(:8080)" as http_server #BBDEFB
+
+    rectangle "频谱平坦度语音检测\n(过滤静音/噪声)" as speech_detect #BBDEFB
+
+    package "双通路分析" as dual_path #FFF9C4 {
+        rectangle "CNN 通路 (本地)" as cnn #FFF176 {
+            [3通道梅尔频谱\n(128×32)] as mel
+            [2D-CNN\n5类分类] as cnn_model
+        }
+        rectangle "Omni 智能体通路 (云端)" as omni #FFCC80 {
+            [2秒音频缓冲] as buffer
+            [48k→16k重采样] as resample
+            [Qwen3.5\nOmni-Flash] as qwen
+        }
+    }
+
+    rectangle "报警引擎" as alert_engine #FFCDD2 {
+        [滑动窗口\n统计] as window
+        [EMA\n平滑] as ema
+        [三级判定\n预报警/警告/危急] as levels
+    }
+
+    ws_server --> speech_detect
+    http_server --> speech_detect
+    speech_detect --> cnn
+    speech_detect --> omni
+    cnn --> alert_engine
+    omni --> alert_engine
+}
+
+package "展示终端" as display #F3E5F5 {
+    rectangle "PyQt5 GUI\n桌面窗口" as gui #E1BEE7
+    rectangle "HTML 仪表盘\n(:8766 WS推送)" as dashboard #E1BEE7
+    rectangle "HTTP API\n/api/analyze" as api #E1BEE7
+}
+
+frontend --(0--> backend : WebSocket\n(JSON+Base64)
+alert_engine --> gui
+alert_engine --> dashboard
+http_server --> api
+
+@enduml

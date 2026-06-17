@@ -1,0 +1,135 @@
+10:37:18 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+10:37:18 [INFO] backend: ==================================================
+10:37:18 [INFO] backend: 后端启动: 双机实时音频监测系统
+10:37:18 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+10:37:18 [INFO] backend: 模拟模式: 关
+10:37:18 [INFO] backend: Omni 智能体: 启用
+10:37:18 [INFO] backend: ==================================================
+10:37:18 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+10:37:18 [INFO] backend:   >>> ws://10.10.125.66:8765
+10:37:19 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+10:37:19 [INFO] backend.classifier: 检测到模型架构: emotion2vec_classifier
+10:37:19 [INFO] backend.classifier: 模型加载成功 (emotion2vec_classifier): models/best_model.pt
+10:37:19 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+10:37:19 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+10:37:19 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+10:37:19 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+10:37:19 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+10:37:19 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+10:37:19 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+10:37:19 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+10:37:19 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+10:37:19 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+10:37:19 [INFO] backend: 后端流水线已就绪，等待前端连接...
+10:37:19 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+10:37:52 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+10:37:59 [INFO] backend.http: [API] 收到文件: 伤心.wav -> C:\Users\44390\AppData\Local\Temp\tmpcqfjv48h.wav
+10:38:03 [INFO] backend.file_handler: librosa 加载成功: 7.3s, sr=16000
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:03 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=89.40%
+10:38:10 [INFO] backend.http: [API] 收到文件: 大笑4.wav -> C:\Users\44390\AppData\Local\Temp\tmp2cqdwu7c.wav
+10:38:10 [INFO] backend.file_handler: librosa 加载成功: 17.5s, sr=16000
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:10 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=91.66%
+10:38:17 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T02-38-17-638Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpj0waatwn.webm
+10:38:17 [INFO] backend.file_handler: librosa 加载成功: 2.8s, sr=16000
+10:38:17 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:17 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:17 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:17 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:17 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=92.15%
+10:38:27 [INFO] backend.http: [API] 收到文件: 愤怒.m4a -> C:\Users\44390\AppData\Local\Temp\tmpz6ix8tv8.m4a
+10:38:27 [INFO] backend.file_handler: librosa 加载成功: 6.9s, sr=16000
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:27 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=90.51%
+10:38:44 [INFO] backend.http: [API] 收到文件: 悲伤.m4a -> C:\Users\44390\AppData\Local\Temp\tmp71ankur9.m4a
+10:38:44 [INFO] backend.file_handler: librosa 加载成功: 10.0s, sr=16000
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:38:44 [INFO] backend.http: [API] 分析完成: 主导=normal, 置信度=90.86%
+10:39:01 [INFO] backend.http: [API] 收到文件: 恐惧2.m4a -> C:\Users\44390\AppData\Local\Temp\tmpw8441rrx.m4a
+10:39:01 [INFO] backend.file_handler: librosa 加载成功: 5.9s, sr=16000
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [ERROR] backend.classifier: 推理失败: mat1 and mat2 shapes cannot be multiplied (384x32 and 768x256)
+10:39:01 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=82.05%
+10:39:29 [INFO] backend.gui: GUI 窗口已关闭
+10:39:29 [INFO] backend.receiver: WebSocket 服务器已停止
+10:39:29 [INFO] backend: 后端已停止

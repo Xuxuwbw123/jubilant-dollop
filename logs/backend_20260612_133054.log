@@ -1,0 +1,48 @@
+13:30:54 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+13:30:54 [INFO] backend: ==================================================
+13:30:54 [INFO] backend: 后端启动: 双机实时音频监测系统
+13:30:54 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+13:30:54 [INFO] backend: 模拟模式: 关
+13:30:54 [INFO] backend: Omni 智能体: 启用
+13:30:54 [INFO] backend: ==================================================
+13:30:54 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+13:30:54 [INFO] backend:   >>> ws://10.10.125.66:8765
+13:30:55 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+13:30:55 [INFO] backend.classifier: 检测到模型架构: emotion2vec_classifier
+13:30:55 [INFO] backend.classifier: 模型加载成功 (emotion2vec_classifier): models/best_model.pt
+13:30:55 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+13:30:55 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+13:30:55 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+13:30:55 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+13:30:55 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+13:30:55 [INFO] backend: 后端流水线已就绪，等待前端连接...
+13:30:55 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+13:30:55 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+13:30:55 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+13:30:55 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+13:30:55 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+13:30:55 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+13:31:05 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+13:31:24 [INFO] backend.http: [API] 收到文件: loud_tone.wav -> C:\Users\44390\AppData\Local\Temp\tmpjjq3edl1.wav
+13:31:28 [INFO] backend.file_handler: librosa 加载成功: 4.0s, sr=16000
+13:31:28 [INFO] backend.file_handler: librosa 加载成功: 4.0s, sr=16000
+13:31:39 [INFO] backend.classifier: emotion2vec 原生情绪模型加载成功
+13:31:39 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=94.17%
+13:33:05 [INFO] backend.http: [API/Omni] 收到文件: t.wav -> C:\Users\44390\AppData\Local\Temp\tmpot7z_d__.wav
+13:33:05 [INFO] backend.file_handler: librosa 加载成功: 2.0s, sr=16000
+13:33:05 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+13:33:11 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 6.2s
+13:33:11 [ERROR] backend.http: [API/Omni] 分析失败: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+Traceback (most recent call last):
+  File "H:\信息\class sheji\tuxiangshibie\backend\main.py", line 1209, in _handle_omni
+    self.wfile.write(response.encode("utf-8"))
+  File "C:\Users\44390\AppData\Local\Programs\Python\Python312\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+13:34:35 [INFO] backend.http: [API] 收到文件: 录音机-20260609-2001.wav -> C:\Users\44390\AppData\Local\Temp\tmpwu0lkltl.wav
+13:34:35 [INFO] backend.file_handler: librosa 加载成功: 16.9s, sr=16000
+13:34:35 [INFO] backend.file_handler: librosa 加载成功: 16.9s, sr=16000
+13:34:50 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=98.78%
+13:35:19 [INFO] backend.gui: GUI 窗口已关闭
+13:35:19 [INFO] backend.receiver: WebSocket 服务器已停止
+13:35:19 [INFO] backend: 后端已停止

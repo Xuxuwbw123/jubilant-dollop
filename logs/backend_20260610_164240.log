@@ -1,0 +1,23 @@
+16:42:40 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+16:42:40 [INFO] backend: ==================================================
+16:42:40 [INFO] backend: 后端启动: 双机实时音频监测系统
+16:42:40 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+16:42:40 [INFO] backend: 模拟模式: 关
+16:42:40 [INFO] backend: Omni 智能体: 启用
+16:42:40 [INFO] backend: ==================================================
+16:42:40 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+16:42:40 [INFO] backend:   >>> ws://10.190.121.254:8765
+16:42:41 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+16:42:41 [INFO] backend.classifier: 模型加载成功: models/best_model.pt
+16:42:41 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+16:42:41 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+16:42:41 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+16:42:41 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+16:42:41 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+16:42:41 [INFO] backend: 后端流水线已就绪，等待前端连接...
+16:42:41 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+16:42:41 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+16:42:41 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+16:42:41 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+16:42:41 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+16:42:41 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni

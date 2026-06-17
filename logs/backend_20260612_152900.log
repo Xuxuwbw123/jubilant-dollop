@@ -1,0 +1,17 @@
+15:29:00 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+15:29:00 [INFO] backend: ==================================================
+15:29:00 [INFO] backend: 后端启动: 双机实时音频监测系统
+15:29:00 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+15:29:00 [INFO] backend: 模拟模式: 关
+15:29:00 [INFO] backend: Omni 智能体: 启用
+15:29:00 [INFO] backend: ==================================================
+15:29:00 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+15:29:00 [INFO] backend:   >>> ws://10.10.125.66:8765
+15:29:01 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+15:29:01 [INFO] backend.classifier: CUDA 可用，将使用 GPU 加速
+15:29:01 [INFO] backend.classifier: 检测到模型架构: emotion2vec_classifier
+15:29:01 [INFO] backend.classifier: 模型加载成功 (emotion2vec_classifier, device=cuda): models/best_model_e2v.pt
+15:29:01 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+15:29:01 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+15:29:01 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+15:29:02 [INFO] backend: 正在预热 CNN 模型 (首次推理较慢, 请稍候)...

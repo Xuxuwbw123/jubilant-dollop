@@ -1,0 +1,68 @@
+@startuml 双机部署架构
+' ============================================
+' 双机部署方案
+' 来源: 项目规划书 13.1节
+' ============================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam defaultFontName Microsoft YaHei
+skinparam rectangleBackgroundColor #E8EAF6
+skinparam nodeBackgroundColor #E3F2FD
+skinparam cloudBackgroundColor #FCE4EC
+
+title 双机分离部署方案 — 采集机 + 推理机\n
+
+node "采集机 (前端)\n树莓派 / 低配 Windows PC" as collector #C8E6C9 {
+    [PyAudio\n麦克风采集] as mic
+    [VAD\n静音过滤] as vad
+    [WebSocket\n客户端] as ws_send
+
+    mic --> vad
+    vad --> ws_send
+}
+
+cloud "WiFi / 局域网" as network {
+}
+
+node "推理机 (后端)\nGPU 服务器 / 高配 PC" as server #BBDEFB {
+    [WebSocket\n服务器 :8765] as ws_recv
+    [CNN 推理\nPyTorch] as inference
+    [报警引擎] as alert
+    [HTTP 服务器\n:8080] as http
+    [WS 仪表盘\n:8766] as dashboard
+
+    ws_recv --> inference
+    inference --> alert
+    alert --> dashboard
+    alert --> http
+}
+
+node "监控终端" as monitor #F3E5F5 {
+    [PyQt5\n桌面 GUI] as gui
+    [浏览器\n仪表盘] as browser
+    [移动端\n推送 (远期)] as mobile
+}
+
+ws_send -right-> ws_recv : WebSocket\n(JSON+Base64)\n~32 KB/s
+dashboard -down-> browser : WebSocket\n(JSON)
+http -down-> gui : 数据
+http -down-> browser : HTML页面
+http ..> mobile : (远期)
+
+note right of server
+  最低配置:
+  CPU: 4核 2GHz+
+  RAM: 8GB+
+  GPU: 可选 (加速推理)
+  存储: 1GB+
+end note
+
+note left of collector
+  最低配置:
+  CPU: 单核 1GHz
+  RAM: 256MB
+  麦克风: USB或内置
+end note
+
+@enduml

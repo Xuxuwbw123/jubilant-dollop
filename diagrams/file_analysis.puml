@@ -1,0 +1,73 @@
+@startuml 文件分析流水线
+' ============================================
+' 文件分析流水线 - HTTP上传 → 全文件分析
+' 来源: 项目规划书 5.6节
+' ============================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam defaultFontName Microsoft YaHei
+skinparam activityBackgroundColor #E8EAF6
+skinparam activityBorderColor #3949AB
+
+title 文件分析流水线 — HTTP API → 滑动窗口 → 汇总输出\n
+
+start
+
+:HTTP POST /api/analyze\n(multipart/form-data);
+
+:接收文件\n(WAV/MP3/M4A/MP4/WebM/...);
+
+partition "音频提取 (三级回退)" #E3F2FD {
+    :① librosa.load()\n(支持ffmpeg后端);
+    if (成功?) then (是)
+    else (否)
+        :② soundfile.read()\n(纯音频);
+        if (成功?) then (是)
+        else (否)
+            :③ ffmpeg 子进程\n(视频/特殊格式);
+            if (成功?) then (是)
+            else (否)
+                :返回错误:\n"格式不支持或ffmpeg未安装";
+                stop
+            endif
+        endif
+    endif
+}
+
+:重采样到 16kHz/mono;
+:float32 归一化;
+
+partition "滑动窗口分析" #FFF9C4 {
+    repeat
+        :取1秒窗口 (16000 samples);
+        :RMS检测;
+        if (RMS < 0.003?) then (是)
+            :标记为 silence;
+        else (否)
+            :3通道梅尔频谱图提取;
+            :时间对齐 → (3, 128, 32);
+            :CNN 分类;
+            :记录 emotion + confidence;
+        endif
+        :步进 0.5秒;
+    repeat while (剩余音频 ≥ 1秒?) is (是)
+    ->否;
+}
+
+partition "汇总统计" #FFE0B2 {
+    :情绪计数 (Counter);
+    :置信度平均 (per class);
+    :主导情绪判定\n(异常占比>20%取最频类);
+    :情绪分布计算;
+    :时间线生成;
+    :中文摘要生成;
+}
+
+:返回 JSON 响应;
+
+:推送到仪表盘 WebSocket\n(实时广播);
+
+stop
+
+@enduml

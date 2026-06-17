@@ -1,0 +1,37 @@
+11:25:26 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+11:25:26 [INFO] backend: ==================================================
+11:25:26 [INFO] backend: 后端启动: 双机实时音频监测系统
+11:25:26 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+11:25:26 [INFO] backend: 模拟模式: 关
+11:25:26 [INFO] backend: Omni 智能体: 禁用
+11:25:26 [INFO] backend: ==================================================
+11:25:26 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+11:25:26 [INFO] backend:   >>> ws://10.10.125.66:8765
+11:25:27 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+11:25:27 [INFO] backend.classifier: 检测到模型架构: emotion2vec_classifier
+11:25:27 [INFO] backend.classifier: 模型加载成功 (emotion2vec_classifier): models/best_model.pt
+11:25:27 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+11:25:27 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+11:25:27 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+11:25:27 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+11:25:27 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+11:25:27 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+11:25:27 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+11:25:27 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+11:25:27 [INFO] backend: 后端流水线已就绪，等待前端连接...
+11:25:27 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+11:25:28 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+11:25:30 [INFO] backend: [仪表盘] 浏览器已连接 (共 2 个)
+12:23:15 [INFO] backend.http: [API] 收到文件: 大笑3.wav -> C:\Users\44390\AppData\Local\Temp\tmpzc56bcau.wav
+12:23:24 [INFO] backend.file_handler: librosa 加载成功: 15.8s, sr=16000
+12:23:52 [INFO] backend.classifier: emotion2vec 原生情绪模型加载成功
+12:23:55 [INFO] backend.http: [API] 分析完成: 主导=开心/happy, 置信度=92.01%
+12:24:11 [INFO] backend.http: [API] 收到文件: 恐惧2.m4a -> C:\Users\44390\AppData\Local\Temp\tmpz07nzyul.m4a
+12:24:11 [INFO] backend.file_handler: librosa 加载成功: 5.9s, sr=16000
+12:24:12 [INFO] backend.http: [API] 分析完成: 主导=恐惧/fearful, 置信度=81.24%
+12:24:23 [INFO] backend.http: [API] 收到文件: 录音机-20260609-2001.wav -> C:\Users\44390\AppData\Local\Temp\tmp4rm0yt31.wav
+12:24:23 [INFO] backend.file_handler: librosa 加载成功: 16.9s, sr=16000
+12:24:26 [INFO] backend.http: [API] 分析完成: 主导=开心/happy, 置信度=98.78%
+12:24:37 [INFO] backend.http: [API/Omni] 收到文件: 录音机-20260609-2001.wav -> C:\Users\44390\AppData\Local\Temp\tmpl7bzz0wm.wav
+12:24:44 [INFO] backend.http: [API/Omni] 收到文件: 愤怒.wav -> C:\Users\44390\AppData\Local\Temp\tmp67y1ixmd.wav
+12:24:45 [INFO] backend.http: [API/Omni] 收到文件: 愤怒.wav -> C:\Users\44390\AppData\Local\Temp\tmpve3i_w6h.wav

@@ -1,0 +1,103 @@
+@startuml Omni智能体分析流程
+' ============================================
+' Omni 智能体 - Qwen3.5-Omni-Flash 云端分析
+' 来源: 项目规划书 5.7节
+' ============================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam defaultFontName Microsoft YaHei
+skinparam activityBackgroundColor #FFF3E0
+skinparam activityBorderColor #E65100
+
+title Omni 智能体情绪分析 — Qwen3.5-Omni-Flash 云端通路\n
+
+start
+
+:前端音频帧到达\n(每30ms);
+
+:累积到2秒缓冲区\n(32000 samples @ 16kHz);
+
+if (距上次触发 ≥ 3秒?) then (否)
+    :等待;
+    stop
+else (是)
+endif
+
+:取最近2秒音频窗口;
+
+:★ VAD 前置过滤;
+note right
+  频谱平坦度检测
+  (Wiener Entropy)
+end note
+
+if (有人声?) then (否)
+    :跳过 API 调用 💤;
+    :标记"无人声";
+    stop
+else (是)
+endif
+
+:48kHz → 16kHz 重采样\n(scipy resample_poly);
+
+:float32 → int16;
+
+:编码为 WAV bytes;
+
+:Base64 编码;
+
+:构建 API 请求\n(data:;base64,<audio>);
+
+:调用 Qwen3.5-Omni-Flash API\n(OpenAI 兼容, stream=True);
+note right
+  System Prompt: 中文指令
+  强制 JSON 输出
+  最多3次重试 (1s/2s/4s)
+  超时: 30s
+end note
+
+:流式 SSE 响应拼接;
+
+:JSON 解析 (3级回退);
+note right
+  ① json.loads() 直接解析
+  ② 正则提取 JSON块
+  ③ 嵌套正则兜底
+end note
+
+partition "结构化输出" #E8F5E9 {
+    :EmotionResult;
+    note right
+      • text: 转写文本
+      • emotion: 7类情绪
+      • emotion_confidence [0,1]
+      • danger_level: 危险/关注/正常
+      • danger_score [0,1]
+      • tone_description: 语气描述
+      • reason: 判定理由
+      • keywords_detected: 关键词
+    end note
+}
+
+partition "情绪→危险映射" #FFEBEE {
+    if (danger_score ≥ 0.60?) then (是)
+        :🔴 危险;
+    else if (danger_score ≥ 0.30?) then (是)
+        :🟡 关注;
+    else (否)
+        :🟢 正常;
+    endif
+}
+
+:★ 双确认门控;
+note right
+  CNN报警需Omni在±5秒内
+  也检测到危险才放行
+end note
+
+:推送到 GUI + 仪表盘;
+
+stop
+
+@enduml

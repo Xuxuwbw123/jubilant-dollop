@@ -1,0 +1,31 @@
+16:11:28 [INFO] backend: ==================================================
+16:11:28 [INFO] backend: 后端启动: 双机实时音频监测系统
+16:11:28 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+16:11:28 [INFO] backend: 模拟模式: 关
+16:11:28 [INFO] backend: ==================================================
+16:11:28 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+16:11:28 [INFO] backend:   >>> ws://10.10.125.66:8765
+16:11:30 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+16:11:30 [WARNING] backend.classifier: 模型文件不存在: models/best_model.pt，使用模拟模式
+16:11:30 [INFO] backend.http: HTTP 仪表盘服务: http://localhost:8080/
+16:11:30 [INFO] backend.http: MP3 分析 API: POST http://localhost:8080/api/analyze
+16:11:30 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+16:11:30 [INFO] backend: 后端流水线已就绪，等待前端连接...
+16:11:30 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+16:12:30 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+16:14:11 [INFO] backend.http: [API] 收到 MP3 分析请求: 113.7 KB
+16:14:18 [INFO] backend.mp3_handler: [MP3分析] 音频加载完成: 3.6s, sr=16000
+16:14:18 [INFO] backend.mp3_handler: [MP3分析] 切分为 6 个窗口 (窗口=1.0s, 步长=0.5s)
+16:14:18 [INFO] backend.mp3_handler: [MP3分析] 完成: 6 段, 判定=safe, 耗时=7.7s
+16:14:22 [INFO] backend.http: [API] 收到 MP3 分析请求: 113.7 KB
+16:14:22 [INFO] backend.mp3_handler: [MP3分析] 音频加载完成: 3.6s, sr=16000
+16:14:22 [INFO] backend.mp3_handler: [MP3分析] 切分为 6 个窗口 (窗口=1.0s, 步长=0.5s)
+16:14:22 [INFO] backend.mp3_handler: [MP3分析] 完成: 6 段, 判定=safe, 耗时=0.1s
+16:14:33 [INFO] backend.http: [API] 收到 MP3 分析请求: 113.7 KB
+16:14:33 [INFO] backend.mp3_handler: [MP3分析] 音频加载完成: 3.6s, sr=16000
+16:14:33 [INFO] backend.mp3_handler: [MP3分析] 切分为 6 个窗口 (窗口=1.0s, 步长=0.5s)
+16:14:33 [INFO] backend.mp3_handler: [MP3分析] 完成: 6 段, 判定=safe, 耗时=0.1s
+16:14:35 [INFO] backend: [仪表盘] 浏览器已断开 (剩余 0 个)
+16:16:01 [INFO] backend.gui: GUI 窗口已关闭
+16:16:01 [INFO] backend.receiver: WebSocket 服务器已停止
+16:16:01 [INFO] backend: 后端已停止

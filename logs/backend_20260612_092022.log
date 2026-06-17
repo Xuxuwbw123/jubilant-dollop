@@ -1,0 +1,92 @@
+09:20:24 [INFO] backend: ffmpeg detected - M4A/AAC/WebM/MP4 formats fully supported
+09:20:24 [INFO] backend: ==================================================
+09:20:24 [INFO] backend: 后端启动: 双机实时音频监测系统
+09:20:24 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+09:20:24 [INFO] backend: 模拟模式: 关
+09:20:24 [INFO] backend: Omni 智能体: 启用
+09:20:24 [INFO] backend: ==================================================
+09:20:24 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+09:20:24 [INFO] backend:   >>> ws://10.10.125.66:8765
+09:20:25 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+09:20:25 [INFO] backend.classifier: 检测到模型架构: v4
+09:20:25 [INFO] backend.classifier: 模型加载成功 (v4): models/best_model.pt
+09:20:25 [INFO] backend: [Omni] 智能体已就绪 | model=qwen3.5-omni-flash | 窗口=2.0s | 间隔=3.0s
+09:20:25 [INFO] backend: 文件分析接口已就绪: POST /api/analyze
+09:20:25 [INFO] backend: Omni 文件分析接口已就绪: POST /api/omni
+09:20:25 [INFO] backend: 仪表盘广播已注册: 文件分析结果将推送到仪表盘
+09:20:25 [INFO] backend.http: HTTP 服务: http://localhost:8080/
+09:20:25 [INFO] backend.http:   后端监控面板: http://localhost:8080/backend-dashboard.html
+09:20:25 [INFO] backend.http:   前端采集面板: http://localhost:8080/frontend-panel.html
+09:20:25 [INFO] backend.http:   文件分析 (CNN): POST http://localhost:8080/api/analyze
+09:20:25 [INFO] backend.http:   文件分析 (Omni): POST http://localhost:8080/api/omni
+09:20:25 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+09:20:25 [INFO] backend: 后端流水线已就绪，等待前端连接...
+09:20:25 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+09:20:45 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+09:21:00 [INFO] backend.http: [API] 收到文件: 惊讶1.wav -> C:\Users\44390\AppData\Local\Temp\tmp6kpu3zg1.wav
+09:21:10 [INFO] backend.file_handler: librosa 加载成功: 15.7s, sr=16000
+09:21:10 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=61.90%
+09:21:20 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T01-21-20-475Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpubt94hzl.webm
+09:21:20 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:21:20 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=60.35%
+09:21:41 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T01-21-41-402Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp6aj4xjqk.webm
+09:21:41 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:21:41 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+09:21:49 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T01-21-49-548Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpc74y0rw4.webm
+09:21:49 [INFO] backend.file_handler: librosa 加载成功: 2.8s, sr=16000
+09:21:49 [INFO] backend.http: [API] 分析完成: 主导=silence, 置信度=100.00%
+09:21:55 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T01-21-55-079Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpaa3wlv39.webm
+09:21:55 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:21:55 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=64.85%
+09:22:01 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T01-22-01-686Z.webm -> C:\Users\44390\AppData\Local\Temp\tmper5i7cgj.webm
+09:22:02 [INFO] backend.file_handler: librosa 加载成功: 2.8s, sr=16000
+09:22:02 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=70.29%
+09:22:11 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T01-22-11-350Z.webm -> C:\Users\44390\AppData\Local\Temp\tmppj_ka8v8.webm
+09:22:11 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:22:11 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=58.03%
+09:22:24 [INFO] backend.http: [API] 收到文件: recording_2026-06-12T01-22-23-924Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp3on32ls7.webm
+09:22:24 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:22:24 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=65.95%
+09:22:35 [INFO] backend.http: [API/Omni] 收到文件: recording_2026-06-12T01-22-35-141Z.webm -> C:\Users\44390\AppData\Local\Temp\tmp2b5dqj7w.webm
+09:22:35 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:22:35 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+09:24:09 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 94.7s
+09:25:13 [INFO] backend.http: [API/Omni] 收到文件: recording_2026-06-12T01-25-13-049Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpz80v3kl1.webm
+09:25:13 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:25:13 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+09:26:17 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 64.2s
+09:27:11 [INFO] backend.http: [API/Omni] 收到文件: recording_2026-06-12T01-27-11-995Z.webm -> C:\Users\44390\AppData\Local\Temp\tmpry5iau_c.webm
+09:27:12 [INFO] backend.file_handler: librosa 加载成功: 2.9s, sr=16000
+09:27:12 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+09:27:12 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 0.8s
+09:27:21 [INFO] backend.http: [API/Omni] 收到文件: 哭3.wav -> C:\Users\44390\AppData\Local\Temp\tmpb03hz8ru.wav
+09:27:21 [INFO] backend.file_handler: librosa 加载成功: 21.7s, sr=16000
+09:27:21 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+09:27:22 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 0.9s
+09:27:32 [INFO] backend.http: [API/Omni] 收到文件: 哭2.wav -> C:\Users\44390\AppData\Local\Temp\tmp1f0p4r2d.wav
+09:27:32 [INFO] backend.file_handler: librosa 加载成功: 20.8s, sr=16000
+09:27:32 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+09:27:33 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 0.9s
+09:27:36 [INFO] backend.http: [API] 收到文件: 哭2.wav -> C:\Users\44390\AppData\Local\Temp\tmp8zao6rav.wav
+09:27:37 [INFO] backend.file_handler: librosa 加载成功: 20.8s, sr=16000
+09:27:37 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=73.55%
+09:27:42 [INFO] backend.http: [API] 收到文件: 大笑4.wav -> C:\Users\44390\AppData\Local\Temp\tmpy7m_51w_.wav
+09:27:42 [INFO] backend.file_handler: librosa 加载成功: 17.5s, sr=16000
+09:27:42 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=59.11%
+09:27:47 [INFO] backend.http: [API] 收到文件: 大笑3.wav -> C:\Users\44390\AppData\Local\Temp\tmprd8mnuxn.wav
+09:27:47 [INFO] backend.file_handler: librosa 加载成功: 15.8s, sr=16000
+09:27:47 [INFO] backend.http: [API] 分析完成: 主导=scream, 置信度=44.25%
+09:27:54 [INFO] backend.http: [API] 收到文件: 大哭1.wav -> C:\Users\44390\AppData\Local\Temp\tmpp556g9m5.wav
+09:27:54 [INFO] backend.file_handler: librosa 加载成功: 18.7s, sr=16000
+09:27:54 [INFO] backend.http: [API] 分析完成: 主导=cry, 置信度=70.83%
+09:28:00 [INFO] backend.http: [API] 收到文件: 大笑2.wav -> C:\Users\44390\AppData\Local\Temp\tmp0wucbo9a.wav
+09:28:00 [INFO] backend.file_handler: librosa 加载成功: 23.4s, sr=16000
+09:28:00 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=73.18%
+09:28:04 [INFO] backend.http: [API] 收到文件: 录音机-20260609-2001.wav -> C:\Users\44390\AppData\Local\Temp\tmpdc6dn9u4.wav
+09:28:04 [INFO] backend.file_handler: librosa 加载成功: 16.9s, sr=16000
+09:28:04 [INFO] backend.http: [API] 分析完成: 主导=laugh, 置信度=68.52%
+09:28:11 [INFO] backend.http: [API/Omni] 收到文件: 录音机-20260609-2001.wav -> C:\Users\44390\AppData\Local\Temp\tmpwtnx41np.wav
+09:28:11 [INFO] backend.file_handler: librosa 加载成功: 16.9s, sr=16000
+09:28:11 [INFO] backend.http: [API/Omni] 音频就绪: 32000 samples @ 16kHz
+09:28:12 [INFO] backend.http: [API/Omni] 分析完成: 中性 | 正常 | 0.8s
+09:28:20 [INFO] backend: [仪表盘] 浏览器已断开 (剩余 0 个)

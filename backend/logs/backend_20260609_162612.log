@@ -1,0 +1,32 @@
+16:26:12 [INFO] backend: ==================================================
+16:26:12 [INFO] backend: 后端启动: 双机实时音频监测系统
+16:26:12 [INFO] backend: 监听地址: ws://0.0.0.0:8765
+16:26:12 [INFO] backend: 模拟模式: 关
+16:26:12 [INFO] backend: ==================================================
+16:26:12 [INFO] backend: 本机局域网 IP (前端请用以下地址连接):
+16:26:12 [INFO] backend:   >>> ws://10.10.125.66:8765
+16:26:15 [INFO] backend.feature_extractor: librosa 特征提取已就绪
+16:26:15 [INFO] backend.classifier: 模型加载成功: H:\信息\class sheji\tuxiangshibie\models\best_model.pt
+16:26:15 [INFO] backend.receiver: WebSocket 服务器已启动: ws://0.0.0.0:8765
+16:26:15 [INFO] backend.http: HTTP 仪表盘服务: http://localhost:8080/
+16:26:15 [INFO] backend: 后端流水线已就绪，等待前端连接...
+16:26:15 [INFO] backend.http: 音频文件分析 API (MP3/WAV): POST http://localhost:8080/api/analyze
+16:26:15 [INFO] backend: [仪表盘] WebSocket 服务: ws://0.0.0.0:8766
+16:27:02 [INFO] backend.http: [API] 收到 MP3 分析请求: 71.8 KB
+16:27:09 [INFO] backend.mp3_handler: [音频分析] 加载完成: 2.3s, sr=16000
+16:27:09 [INFO] backend.mp3_handler: [音频分析] 切分为 3 个窗口 (窗口=1.0s, 步长=0.5s)
+16:27:09 [INFO] backend.mp3_handler: [音频分析] 完成: 3 段, 判定=danger, 耗时=7.1s
+16:27:11 [INFO] backend.http: [API] 收到 MP3 分析请求: 71.2 KB
+16:27:11 [INFO] backend.mp3_handler: [音频分析] 加载完成: 2.3s, sr=16000
+16:27:11 [INFO] backend.mp3_handler: [音频分析] 切分为 3 个窗口 (窗口=1.0s, 步长=0.5s)
+16:27:11 [INFO] backend.mp3_handler: [音频分析] 完成: 3 段, 判定=danger, 耗时=0.0s
+16:28:09 [INFO] backend: [仪表盘] 浏览器已连接 (共 1 个)
+16:28:16 [INFO] backend.http: [API] 收到 MP3 分析请求: 62.6 KB
+16:28:16 [INFO] backend.mp3_handler: [音频分析] 加载完成: 2.0s, sr=16000
+16:28:16 [INFO] backend.mp3_handler: [音频分析] 切分为 3 个窗口 (窗口=1.0s, 步长=0.5s)
+16:28:16 [INFO] backend.mp3_handler: [音频分析] 完成: 3 段, 判定=warning, 耗时=0.1s
+16:28:28 [INFO] backend.http: [API] 收到 MP3 分析请求: 124.1 KB
+16:28:29 [INFO] backend.mp3_handler: [音频分析] 加载完成: 4.0s, sr=16000
+16:28:29 [INFO] backend.mp3_handler: [音频分析] 切分为 6 个窗口 (窗口=1.0s, 步长=0.5s)
+16:28:29 [INFO] backend.mp3_handler: [音频分析] 完成: 6 段, 判定=danger, 耗时=0.1s
+16:28:34 [INFO] backend: [仪表盘] 浏览器已断开 (剩余 0 个)
