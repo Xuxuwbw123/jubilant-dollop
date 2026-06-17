@@ -1,0 +1,33 @@
+{
+  "model": "emotion2vec_classifier",
+  "test_acc": 0.8815,
+  "test_macro_f1": 0.8735,
+  "best_val_f1": 0.867,
+  "best_epoch": 72,
+  "per_class": {
+    "normal": {
+      "precision": 0.8919,
+      "recall": 0.8684,
+      "f1": 0.88,
+      "support": 38
+    },
+    "scream": {
+      "precision": 0.9444,
+      "recall": 0.8673,
+      "f1": 0.9043,
+      "support": 98
+    },
+    "cry": {
+      "precision": 0.8205,
+      "recall": 0.8649,
+      "f1": 0.8421,
+      "support": 37
+    },
+    "laugh": {
+      "precision": 0.8,
+      "recall": 0.9474,
+      "f1": 0.8675,
+      "support": 38
+    }
+  }
+}

@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后端监控 · 双机实时音频监测系统</title>
+<style>
+/* ============================================================
+   DESIGN ASSUMPTIONS (Junior Pass · huashu-design v4)
+   ------------------------------------------------------------
+   1. 移除 Canvas 时间轴 — 用户反馈「流式图没什么用」
+   2. 双核：模型反馈（CNN + Omni） + 报警历史
+   3. Omni 结果在文件分析到达时完整展示（情绪/危险/转写/理由）
+   4. 继承 frontend-panel 暗色指挥中心 CSS 变量体系
+   5. 反 slop：纯色状态标记、最小装饰
+   ============================================================ */
+
+/* ---- CSS Custom Properties (与 frontend-panel 统一) ---- */
+:root {
+  --bg-deep:    #060d15;
+  --bg-surface: #0c1520;
+  --bg-card:    #101a28;
+  --bg-card-hover: #141e30;
+  --border:     #1a2738;
+  --border-active: #2a3a50;
+  --text-primary:   #e2e8f2;
+  --text-secondary: #6b7d95;
+  --text-muted:     #3d4f65;
+  --accent:      #00e5a0;
+  --accent-dim:  #006b4a;
+  --warning:     #f0a030;
+  --warning-dim: #6b3d00;
+  --critical:    #ff4040;
+  --critical-dim:#6b1010;
+  --info:        #4090e0;
+  --info-dim:    #102850;
+  --font-display: 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+  --font-mono:   'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+
+/* ---- Reset & Base ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(rgba(0,229,160,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,160,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center center;
+}
+
+/* ---- Top Bar ---- */
+.top-bar {
+  height: 44px;
+  background: rgba(6,13,21,0.88);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 20;
+  position: relative;
+}
+.top-bar-left { display: flex; align-items: center; gap: 14px; }
+.top-bar-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-primary);
+}
+.top-bar-status {
+  font-size: 10px; padding: 2px 10px; border-radius: 3px;
+  font-weight: 600; letter-spacing: 0.06em;
+  background: var(--accent-dim); color: var(--accent);
+  transition: background 0.3s, color 0.3s;
+}
+.top-bar-status.offline { background: var(--critical-dim); color: var(--critical); }
+.top-bar-right { display: flex; align-items: center; gap: 18px; font-size: 12px; color: var(--text-secondary); }
+.top-bar-link {
+  color: var(--info); text-decoration: none; font-size: 12px;
+  transition: color 0.2s; letter-spacing: 0.03em;
+}
+.top-bar-link:hover { color: #60a8f0; }
+.top-bar-time {
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--text-secondary); letter-spacing: 0.04em;
+}
+
+/* Connection Indicator */
+.conn-indicator { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; }
+.conn-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent-dim);
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.conn-dot.offline {
+  background: var(--critical); box-shadow: 0 0 8px var(--critical-dim);
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+.conn-dot.checking {
+  background: var(--warning); box-shadow: 0 0 8px var(--warning-dim);
+  animation: dot-pulse 0.8s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+}
+
+/* Settings gear */
+.top-bar-btn {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; padding: 4px; border-radius: 4px;
+  transition: all 0.2s; display: flex; align-items: center;
+}
+.top-bar-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
+.top-bar-btn.has-config { color: var(--accent); }
+
+/* ---- Main Layout ---- */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  height: calc(100vh - 44px);
+  padding: 14px 20px 12px;
+  gap: 12px;
+}
+
+/* ---- LEFT: Model Feedback (CNN + Omni) ---- */
+.feedback-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  min-width: 0;
+}
+.feedback-zone::-webkit-scrollbar { width: 4px; }
+.feedback-zone::-webkit-scrollbar-track { background: transparent; }
+.feedback-zone::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  position: relative;
+}
+.card-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-header-count {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-secondary); font-weight: 400;
+}
+
+/* ---- CNN Classification Result ---- */
+.cnn-section { text-align: center; }
+.class-name {
+  font-size: 72px; font-weight: 900; letter-spacing: 0.04em;
+  line-height: 1.05; margin: 0 0 8px;
+  transition: color 0.35s ease, text-shadow 0.35s ease, transform 0.25s ease;
+}
+.class-name.normal  { color: var(--accent); text-shadow: 0 0 56px rgba(0,229,160,0.25); }
+.class-name.abnormal { color: var(--critical); text-shadow: 0 0 56px rgba(255,64,64,0.35); }
+.class-name.pulse-in {
+  animation: class-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes class-pop {
+  0%   { transform: scale(1.12); opacity: 0.6; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* ---- Data Flow Activity Indicator ---- */
+.data-flow-ring {
+  position: absolute; top: -2px; right: -2px; bottom: -2px; left: -2px;
+  border-radius: 10px; pointer-events: none; z-index: 0;
+  border: 1px solid transparent;
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
+}
+.data-flow-ring.active {
+  border-color: rgba(0,229,160,0.18);
+  box-shadow: 0 0 20px rgba(0,229,160,0.06);
+  animation: data-pulse 2.5s ease-in-out infinite;
+}
+@keyframes data-pulse {
+  0%, 100% { border-color: rgba(0,229,160,0.12); box-shadow: 0 0 12px rgba(0,229,160,0.03); }
+  50%      { border-color: rgba(0,229,160,0.28); box-shadow: 0 0 28px rgba(0,229,160,0.10); }
+}
+
+/* Source tag */
+.source-tag {
+  display: inline-block;
+  padding: 2px 10px; border-radius: 3px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.source-tag.realtime  { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+.source-tag.file-cnn  { background: var(--info-dim); color: var(--info); }
+.source-tag.file-omni { background: var(--accent-dim); color: var(--accent); }
+
+/* Confidence bar */
+.conf-bar-wrap {
+  margin: 0 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 3px; height: 6px; overflow: hidden;
+}
+.conf-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.4s ease, background 0.3s;
+  background: var(--accent);
+}
+.conf-label {
+  font-size: 11px; color: var(--text-secondary);
+  margin-top: 6px; font-family: var(--font-mono); letter-spacing: 0.03em;
+}
+
+/* Per-class emotion bars */
+.class-bars {
+  display: flex; flex-direction: column; gap: 4px; margin-top: 12px;
+}
+.class-bar-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.class-bar-label {
+  width: 34px; text-align: right; color: var(--text-secondary);
+  flex-shrink: 0; font-size: 10px;
+}
+.class-bar-track {
+  flex: 1; height: 6px; background: rgba(255,255,255,0.03);
+  border-radius: 3px; overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+.class-bar-fill {
+  height: 100%; border-radius: 3px; transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  background-image: linear-gradient(180deg,
+    rgba(255,255,255,0.15) 0%,
+    transparent 60%,
+    rgba(0,0,0,0.1) 100%);
+  box-shadow: 0 0 4px currentColor;
+}
+.class-bar-fill.top-hit {
+  box-shadow: 0 0 8px currentColor, 0 0 2px currentColor;
+}
+.class-bar-val {
+  width: 34px; font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-muted); text-align: left; flex-shrink: 0;
+}
+
+/* ---- Alert Search/Filter ---- */
+.alert-search-wrap {
+  margin-bottom: 8px; flex-shrink: 0;
+}
+.alert-search {
+  width: 100%; padding: 7px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.alert-search::placeholder { color: var(--text-muted); }
+.alert-search:focus {
+  border-color: var(--border-active);
+  background: rgba(255,255,255,0.05);
+}
+
+/* ---- CNN File Summary ---- */
+.cnn-summary {
+  margin-top: 14px; padding: 10px 14px;
+  background: rgba(64,144,224,0.04);
+  border: 1px solid rgba(64,144,224,0.12);
+  border-radius: 5px;
+  font-size: 12px; color: var(--info);
+  line-height: 1.6;
+}
+
+/* ---- Omni Result Section ---- */
+.omni-section {
+  display: none;
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.omni-section.visible { display: block; }
+
+.omni-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.omni-header-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--accent); font-weight: 600;
+}
+.omni-header-model {
+  font-size: 9px; color: var(--text-muted);
+  font-family: var(--font-mono);
+  background: rgba(255,255,255,0.04);
+  padding: 1px 8px; border-radius: 3px;
+}
+
+.omni-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.omni-cell {
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+.omni-cell.wide { grid-column: 1 / -1; }
+.omni-cell-label {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted); margin-bottom: 4px;
+}
+.omni-cell-value {
+  font-size: 15px; font-weight: 700; letter-spacing: 0.03em;
+  color: var(--text-primary);
+}
+.omni-cell-value.danger-safe    { color: var(--accent); }
+.omni-cell-value.danger-caution { color: var(--warning); }
+.omni-cell-value.danger-danger  { color: var(--critical); }
+.omni-cell-value.transcript {
+  font-size: 14px; font-style: italic; font-weight: 400;
+  color: var(--text-primary); line-height: 1.5;
+}
+.omni-cell-value.reason {
+  font-size: 11px; font-weight: 400; color: var(--text-secondary); line-height: 1.5;
+}
+
+/* ---- RIGHT: Alert History ---- */
+.alert-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+.alert-panel::-webkit-scrollbar { width: 4px; }
+.alert-panel::-webkit-scrollbar-track { background: transparent; }
+.alert-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Current alert status strip */
+.alert-now {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 5px;
+  background: rgba(0,229,160,0.06);
+  border: 1px solid rgba(0,229,160,0.15);
+  transition: all 0.4s; flex-shrink: 0;
+}
+.alert-now.caution {
+  background: rgba(240,160,48,0.06); border-color: rgba(240,160,48,0.2);
+}
+.alert-now.danger {
+  background: rgba(255,64,64,0.08); border-color: rgba(255,64,64,0.25);
+  animation: alert-flash 0.6s ease-out;
+}
+@keyframes alert-flash {
+  0%   { background: rgba(255,64,64,0.18); border-color: var(--critical); }
+  100% { background: rgba(255,64,64,0.08); border-color: rgba(255,64,64,0.25); }
+}
+.alert-now-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 16px; font-weight: 900;
+}
+.alert-now-icon.safe    { background: rgba(0,229,160,0.15); color: var(--accent); }
+.alert-now-icon.caution { background: rgba(240,160,48,0.15); color: var(--warning); }
+.alert-now-icon.danger  { background: rgba(255,64,64,0.18); color: var(--critical); }
+.alert-now-text { flex: 1; min-width: 0; }
+.alert-now-title {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.04em;
+}
+.alert-now-title.safe    { color: var(--accent); }
+.alert-now-title.caution { color: var(--warning); }
+.alert-now-title.danger  { color: var(--critical); }
+.alert-now-detail {
+  font-size: 10px; color: var(--text-muted);
+  font-family: var(--font-mono); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* History scroll */
+.history-scroll {
+  flex: 1; overflow-y: auto; font-family: var(--font-mono);
+  font-size: 11px; min-height: 0;
+}
+.history-scroll::-webkit-scrollbar { width: 3px; }
+.history-scroll::-webkit-scrollbar-track { background: transparent; }
+.history-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.history-table { width: 100%; border-collapse: collapse; }
+.history-table th {
+  text-align: left; padding: 5px 8px;
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted); border-bottom: 1px solid var(--border);
+  font-weight: 600; position: sticky; top: 0; background: var(--bg-card);
+}
+.history-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(26,39,56,0.35);
+  color: var(--text-secondary);
+}
+.history-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+.lvl-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 3px;
+  font-size: 9px; font-weight: 600; letter-spacing: 0.05em;
+}
+.lvl-badge.pre_alert  { background: var(--warning-dim); color: var(--warning); }
+.lvl-badge.warning   { background: var(--warning-dim); color: var(--warning); }
+.lvl-badge.critical  { background: var(--critical-dim); color: var(--critical); }
+
+.history-table .emotion-critical { color: var(--critical); font-weight: 600; }
+.history-table .emotion-warning  { color: var(--warning); font-weight: 600; }
+
+.empty-state {
+  text-align: center; color: var(--text-muted);
+  padding: 20px 16px; font-size: 11px;
+}
+
+/* ---- Settings Overlay ---- */
+.settings-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 200; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.settings-overlay.visible { display: flex; }
+.settings-dialog {
+  background: var(--bg-card); border: 1px solid var(--border-active);
+  border-radius: 12px; padding: 28px 32px; width: 460px; max-width: 90vw;
+}
+.settings-dialog h3 {
+  font-size: 16px; font-weight: 700; letter-spacing: 0.05em;
+  margin-bottom: 20px; color: var(--text-primary);
+}
+.settings-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.settings-row label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);
+}
+.settings-row input {
+  padding: 10px 14px; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text-primary); font-family: var(--font-mono);
+  font-size: 14px; outline: none; transition: border-color 0.2s;
+}
+.settings-row input:focus { border-color: var(--info); }
+.settings-row .hint { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+.settings-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+.settings-btn {
+  padding: 9px 22px; border-radius: 6px; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: var(--font-display);
+  letter-spacing: 0.04em; transition: all 0.2s;
+}
+.settings-btn.primary { background: var(--info); color: #fff; border: none; }
+.settings-btn.primary:hover { background: #5098e8; }
+.settings-btn.secondary {
+  background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
+}
+.settings-btn.secondary:hover { color: var(--text-primary); border-color: var(--border-active); }
+.settings-btn.test {
+  background: transparent; color: var(--accent);
+  border: 1px solid var(--accent-dim); margin-right: auto;
+}
+.settings-btn.test:hover { background: rgba(0,229,160,0.06); }
+.settings-btn.test.ok { color: var(--accent); border-color: var(--accent); }
+.settings-btn.test.fail { color: var(--critical); border-color: var(--critical); }
+
+/* ---- Responsive ---- */
+@media (min-width: 1600px) {
+  .class-name { font-size: 84px; }
+}
+@media (max-width: 1100px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    padding: 10px 12px 8px; gap: 8px;
+  }
+  .class-name { font-size: 48px; }
+  .alert-panel { max-height: 320px; }
+  .top-bar { padding: 0 14px; }
+}
+@media (max-width: 700px) {
+  .class-name { font-size: 36px; }
+  .card { padding: 12px 14px; }
+  .top-bar-right { gap: 10px; }
+  .top-bar-link, .top-bar-status { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <span class="top-bar-title">◈ 双机实时音频监测系统</span>
+    <span class="top-bar-status" id="top-bar-mode">实时监听</span>
+  </div>
+  <div class="top-bar-right">
+    <a class="top-bar-link" href="/frontend-panel.html">前端采集面板</a>
+    <button class="top-bar-btn" id="settings-btn" title="配置数据源">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="2.5"/>
+        <path d="M8 1.5v1.2M8 13.3v1.2M1.5 8h1.2M13.3 8h1.2M3.4 3.4l.85.85M11.75 11.75l.85.85M3.4 12.6l.85-.85M11.75 4.25l.85-.85"/>
+      </svg>
+    </button>
+    <div class="conn-indicator" id="conn-indicator">
+      <span class="conn-dot checking" id="conn-dot"></span>
+      <span id="conn-label">检测中…</span>
+    </div>
+    <span class="top-bar-time" id="clock">--:--:--</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     SETTINGS OVERLAY
+     ============================================================ -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-dialog">
+    <h3>数据源配置</h3>
+    <div class="settings-row">
+      <label>WebSocket 数据源地址</label>
+      <input type="text" id="settings-ws-url"
+             placeholder="例如: ws://192.168.1.100:8766"
+             autocomplete="off" spellcheck="false">
+      <span class="hint">
+        后端分类实时数据的 WebSocket 地址。默认为当前页面地址的 8766 端口。<br>
+        如果从其他机器访问此面板（如前端电脑），请输入后端机器的 IP。
+      </span>
+    </div>
+    <div class="settings-row" id="settings-status-row" style="display:none">
+      <span id="settings-test-result" style="font-size:12px;"></span>
+    </div>
+    <div class="settings-actions">
+      <button class="settings-btn test" id="settings-test-btn">测试连接</button>
+      <button class="settings-btn secondary" id="settings-cancel-btn">取消</button>
+      <button class="settings-btn primary" id="settings-save-btn">保存并重连</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN DASHBOARD
+     ============================================================ -->
+<div class="dashboard">
+
+  <!-- ===== LEFT: Model Feedback ===== -->
+  <div class="feedback-zone">
+
+    <!-- CNN Classification -->
+    <div class="card" id="classify-card" style="position:relative;">
+      <div class="data-flow-ring" id="data-flow-ring"></div>
+      <div class="card-header">
+        <span>模型实时反馈</span>
+        <span id="source-tag-area"></span>
+      </div>
+
+      <div class="cnn-section">
+        <div class="class-name normal" id="class-name">--</div>
+        <div class="conf-bar-wrap">
+          <div class="conf-bar-fill" id="conf-bar" style="width:0%"></div>
+        </div>
+        <div class="conf-label" id="conf-label">等待数据…</div>
+        <div class="class-bars" id="class-bars"><!-- JS filled --></div>
+      </div>
+
+      <!-- CNN file summary (file_cnn only) -->
+      <div class="cnn-summary" id="cnn-summary" style="display:none"></div>
+
+      <!-- Omni Result (file_omni only) -->
+      <div class="omni-section" id="omni-section">
+        <div class="omni-header">
+          <span class="omni-header-label">Omni 云端分析</span>
+          <span class="omni-header-model">qwen3.5-omni-flash</span>
+        </div>
+        <div class="omni-grid">
+          <div class="omni-cell">
+            <div class="omni-cell-label">情绪判断</div>
+            <div class="omni-cell-value" id="omni-emotion">--</div>
+          </div>
+          <div class="omni-cell">
+            <div class="omni-cell-label">危险等级</div>
+            <div class="omni-cell-value" id="omni-danger">--</div>
+          </div>
+          <div class="omni-cell wide">
+            <div class="omni-cell-label">语音转写</div>
+            <div class="omni-cell-value transcript" id="omni-text">--</div>
+          </div>
+          <div class="omni-cell wide">
+            <div class="omni-cell-label">分析理由</div>
+            <div class="omni-cell-value reason" id="omni-reason">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== RIGHT: Alert History ===== -->
+  <div class="alert-panel">
+
+    <div class="card" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+      <div class="card-header">
+        <span>报警历史</span>
+        <span class="card-header-count" id="history-count">0 条</span>
+      </div>
+
+      <!-- Current alert status -->
+      <div class="alert-now safe" id="alert-now">
+        <span class="alert-now-icon safe" id="alert-now-icon">✓</span>
+        <div class="alert-now-text">
+          <div class="alert-now-title safe" id="alert-now-title">正常</div>
+          <div class="alert-now-detail" id="alert-now-detail">系统运行正常，未检测到异常情绪</div>
+        </div>
+      </div>
+
+      <!-- Alert search -->
+      <div class="alert-search-wrap">
+        <input class="alert-search" id="alert-search" type="text"
+               placeholder="搜索报警… (类别 / 级别 / 详情)"
+               autocomplete="off" spellcheck="false">
+      </div>
+
+      <!-- History list -->
+      <div class="history-scroll" id="history-scroll">
+        <table class="history-table">
+          <thead><tr><th>时间</th><th>级别</th><th>类别</th><th>详情</th></tr></thead>
+          <tbody id="history-body">
+            <tr><td colspan="4"><div class="empty-state">系统就绪，等待数据…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// 0. Constants
+// ============================================================
+const CLASS_NAMES = ['normal', 'scream', 'cry', 'laugh', 'silence'];
+const CLASS_CN = { normal:'正常', scream:'尖叫', cry:'大哭', laugh:'大笑', silence:'静音',
+  angry:'愤怒', fearful:'恐惧', sad:'悲伤', happy:'开心', neutral:'中性', surprised:'惊讶', disgusted:'厌恶', other:'其他', unk:'未知' };
+const CLASS_COLORS = {
+  normal:'#00e5a0', scream:'#ff4040', cry:'#f0a030',
+  laugh:'#4090e0', silence:'#3d4f65',
+  angry:'#ff4040', fearful:'#e04060', sad:'#f0a030',
+  happy:'#4090e0', surprised:'#c070e0', neutral:'#00e5a0'
+};
+
+let alertHistory = [];
+let lastAlertLevel = 'normal';
+let currentSource = null;  // 'realtime' | 'file_cnn' | 'file_omni'
+let lastClassName = null;   // 跟踪类别变化用于动画触发
+let dataFlowTimeout = null; // 数据流活性超时
+
+// ============================================================
+// 1. WebSocket URL Configuration
+// ============================================================
+function getConfiguredWsUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const urlParam = params.get('ws');
+  if (urlParam) {
+    let url = urlParam.trim();
+    if (!url.startsWith('ws://') && !url.startsWith('wss://')) url = 'ws://' + url;
+    localStorage.setItem('dashboard_ws_url', url);
+    return url;
+  }
+  const saved = localStorage.getItem('dashboard_ws_url');
+  if (saved) return saved;
+  return `ws://${location.hostname}:8766`;
+}
+
+let DASHBOARD_WS_URL = getConfiguredWsUrl();
+let ws = null;
+let reconnectTimer = null;
+
+// ============================================================
+// 2. UI Update Functions
+// ============================================================
+
+// ---- Source Tag ----
+function setSourceTag(source, fileName) {
+  currentSource = source;
+  const el = document.getElementById('source-tag-area');
+  const config = {
+    realtime:  { cls: 'source-tag realtime',  text: '实时流' },
+    file_cnn:  { cls: 'source-tag file-cnn',  text: 'CNN 文件分析' + (fileName ? ' · ' + fileName : '') },
+    file_omni: { cls: 'source-tag file-omni', text: 'Omni 文件分析' + (fileName ? ' · ' + fileName : '') },
+  };
+  const cfg = config[source] || config.realtime;
+  el.innerHTML = `<span class="${cfg.cls}">${cfg.text}</span>`;
+}
+
+// ---- CNN Model Feedback ----
+function updateCNN(className, confidence, isAbnormal, allProbs) {
+  const cnName = CLASS_CN[className] || className;
+  const nameEl = document.getElementById('class-name');
+
+  // ★ 类别变化时触发 pop 动画
+  if (className !== lastClassName) {
+    nameEl.classList.remove('pulse-in');
+    void nameEl.offsetWidth; // 强制回流, 重启动画
+    nameEl.classList.add('pulse-in');
+    lastClassName = className;
+  }
+
+  nameEl.textContent = cnName;
+  nameEl.className = 'class-name ' + (isAbnormal ? 'abnormal' : 'normal');
+
+  const barEl = document.getElementById('conf-bar');
+  barEl.style.width = (confidence * 100) + '%';
+  barEl.style.background = isAbnormal
+    ? (CLASS_COLORS[className] || 'var(--critical)')
+    : 'var(--accent)';
+
+  document.getElementById('conf-label').textContent =
+    '置信度 ' + (confidence * 100).toFixed(1) + '%';
+
+  // Per-class bars (增强版: 渐变 + 阴影深度)
+  const barsEl = document.getElementById('class-bars');
+  const hasProbs = allProbs && Object.keys(allProbs).length > 0;
+  barsEl.innerHTML = CLASS_NAMES.filter(c => c !== 'silence').map(cls => {
+    const val = hasProbs ? (allProbs[cls] || 0) : (cls === className ? confidence : 0.04);
+    const isTop = cls === className;
+    const pct = (val * 100).toFixed(0);
+    return `<div class="class-bar-row">
+      <span class="class-bar-label">${CLASS_CN[cls]}</span>
+      <div class="class-bar-track">
+        <div class="class-bar-fill${isTop ? ' top-hit' : ''}"
+             style="width:${val*100}%;background:${CLASS_COLORS[cls]};color:${CLASS_COLORS[cls]}"></div>
+      </div>
+      <span class="class-bar-val">${hasProbs ? pct + '%' : (isTop ? pct + '%' : '--')}</span>
+    </div>`;
+  }).join('');
+
+  // Hide Omni section when showing CNN-only results
+  if (currentSource !== 'file_omni') {
+    document.getElementById('omni-section').classList.remove('visible');
+  }
+
+  // ★ 激活数据流活性指示器
+  activateDataFlow();
+}
+
+// ---- CNN File Summary ----
+function showCNNSummary(summary, totalWindows) {
+  const el = document.getElementById('cnn-summary');
+  el.style.display = 'block';
+  el.textContent = '分析结果: ' + summary + ' (共 ' + totalWindows + ' 个窗口)';
+}
+
+function hideCNNSummary() {
+  document.getElementById('cnn-summary').style.display = 'none';
+}
+
+// ---- Omni Result ----
+function showOmniResult(omni) {
+  const section = document.getElementById('omni-section');
+  section.classList.add('visible');
+
+  document.getElementById('omni-emotion').textContent = omni.emotion_cn || '--';
+  document.getElementById('omni-emotion').className = 'omni-cell-value';
+
+  const dangerEl = document.getElementById('omni-danger');
+  const dangerLevel = omni.danger_level || '';
+  dangerEl.textContent = dangerLevel
+    ? dangerLevel + ' (' + ((omni.danger_score || 0) * 100).toFixed(0) + '%)'
+    : '--';
+  if (dangerLevel === '安全') {
+    dangerEl.className = 'omni-cell-value danger-safe';
+  } else if (dangerLevel === '关注') {
+    dangerEl.className = 'omni-cell-value danger-caution';
+  } else if (dangerLevel === '危险') {
+    dangerEl.className = 'omni-cell-value danger-danger';
+  } else {
+    dangerEl.className = 'omni-cell-value';
+  }
+
+  document.getElementById('omni-text').textContent = omni.text || '(无语音内容)';
+  document.getElementById('omni-reason').textContent = omni.reason || '--';
+}
+
+function hideOmniResult() {
+  document.getElementById('omni-section').classList.remove('visible');
+}
+
+// ---- Alert Status ----
+function updateAlertNow(level, className, severity, message) {
+  const strip = document.getElementById('alert-now');
+  const icon = document.getElementById('alert-now-icon');
+  const title = document.getElementById('alert-now-title');
+  const detail = document.getElementById('alert-now-detail');
+
+  const config = {
+    normal:    { cls:'safe',    icon:'✓', title:'正常', detail:'系统运行正常，未检测到异常情绪' },
+    pre_alert: { cls:'caution', icon:'!', title:'注意', detail:'' },
+    warning:   { cls:'caution', icon:'!', title:'警告', detail:'' },
+    critical:  { cls:'danger',  icon:'!!', title:'危急', detail:'' },
+  };
+  const cfg = config[level] || config.normal;
+
+  strip.className = 'alert-now ' + cfg.cls;
+  icon.className = 'alert-now-icon ' + cfg.cls;
+  icon.textContent = cfg.icon;
+  title.className = 'alert-now-title ' + cfg.cls;
+  title.textContent = cfg.title;
+
+  if (level === 'normal') {
+    detail.textContent = cfg.detail;
+  } else {
+    const cn = CLASS_CN[className] || className;
+    detail.textContent = cn + ' · 严重度 ' + (severity || 0).toFixed(2) + (message ? ' · ' + message.slice(0, 40) : '');
+  }
+}
+
+// ---- Alert History ----
+function addHistory(time, level, className, severity, detail) {
+  alertHistory.unshift({ time, level, className, severity, detail });
+  if (alertHistory.length > 100) alertHistory.length = 100;
+
+  const tbody = document.getElementById('history-body');
+  if (alertHistory.length === 1) tbody.innerHTML = '';
+
+  const levelCN = { pre_alert:'注意', warning:'警告', critical:'危急' };
+  const isDanger = (level === 'critical' || level === 'warning');
+  const emoCN = CLASS_CN[className] || className;
+
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${time}</td>
+    <td><span class="lvl-badge ${level}">${levelCN[level] || level}</span></td>
+    <td class="${isDanger ? 'emotion-critical' : 'emotion-warning'}">${emoCN}</td>
+    <td>${(detail || '').slice(0, 45)}</td>`;
+  tbody.insertBefore(row, tbody.firstChild);
+
+  while (tbody.children.length > 50) tbody.removeChild(tbody.lastChild);
+  document.getElementById('history-count').textContent = alertHistory.length + ' 条';
+}
+
+// ---- Connection ----
+function updateConnection(state, label) {
+  const dot = document.getElementById('conn-dot');
+  const lbl = document.getElementById('conn-label');
+  const modeEl = document.getElementById('top-bar-mode');
+
+  if (state === 'connected') {
+    dot.className = 'conn-dot';
+    lbl.textContent = label || '数据已接入';
+    lbl.style.color = 'var(--accent)';
+    modeEl.textContent = '实时监听';
+    modeEl.className = 'top-bar-status';
+  } else if (state === 'connecting') {
+    dot.className = 'conn-dot checking';
+    lbl.textContent = label || '连接中…';
+    lbl.style.color = 'var(--text-secondary)';
+  } else {
+    dot.className = 'conn-dot offline';
+    lbl.textContent = label || '数据源断开';
+    lbl.style.color = 'var(--text-secondary)';
+    modeEl.textContent = '离线';
+    modeEl.className = 'top-bar-status offline';
+  }
+}
+
+// ---- Data Flow Activity ----
+function activateDataFlow() {
+  const ring = document.getElementById('data-flow-ring');
+  ring.classList.add('active');
+  if (dataFlowTimeout) clearTimeout(dataFlowTimeout);
+  dataFlowTimeout = setTimeout(() => {
+    ring.classList.remove('active');
+  }, 3000);
+}
+
+// ---- Alert Search/Filter ----
+(function() {
+  const searchInput = document.getElementById('alert-search');
+  if (!searchInput) return;
+  searchInput.addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#history-body tr');
+    rows.forEach(row => {
+      if (!q) { row.style.display = ''; return; }
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(q) ? '' : 'none';
+    });
+  });
+})();
+
+// ---- Clock ----
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('zh-CN', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+// 3. Message Handlers
+// ============================================================
+function handleRealtimeResult(data) {
+  setSourceTag('realtime');
+  hideCNNSummary();
+  hideOmniResult();
+
+  const className = data.class_name;
+  const confidence = data.confidence;
+  const isAbnormal = data.is_abnormal;
+  const allProbs = data.all_probs || {};
+
+  updateCNN(className, confidence, isAbnormal, allProbs);
+
+  if (data.alert) {
+    const a = data.alert;
+    if (a.level !== lastAlertLevel || a.level === 'critical') {
+      updateAlertNow(a.level, a.class_name, a.severity, a.message);
+      lastAlertLevel = a.level;
+      addHistory(
+        new Date().toLocaleTimeString('zh-CN', { hour12: false }),
+        a.level, a.class_name, a.severity, a.message || ''
+      );
+    }
+  } else if (lastAlertLevel !== 'normal') {
+    updateAlertNow('normal');
+    lastAlertLevel = 'normal';
+  }
+}
+
+function handleFileResult(data) {
+  const className = data.class_name;
+  const confidence = data.confidence;
+  const isAbnormal = data.is_abnormal;
+  const allProbs = data.all_probs || {};
+
+  if (data.source === 'file_omni') {
+    // === Omni file result ===
+    setSourceTag('file_omni', data.file);
+    hideCNNSummary();
+    updateCNN(className, confidence, isAbnormal, allProbs);
+
+    if (data.omni) {
+      showOmniResult(data.omni);
+    }
+
+    if (data.alert) {
+      const a = data.alert;
+      updateAlertNow(a.level, a.class_name, a.severity, a.message);
+      lastAlertLevel = a.level;
+      addHistory(
+        new Date().toLocaleTimeString('zh-CN', { hour12: false }),
+        a.level, a.class_name, a.severity, a.message || ''
+      );
+    }
+  } else if (data.source === 'file_cnn') {
+    // === CNN file result ===
+    setSourceTag('file_cnn', data.file);
+    hideOmniResult();
+    updateCNN(className, confidence, isAbnormal, allProbs);
+
+    if (data.cnn && data.cnn.summary) {
+      showCNNSummary(data.cnn.summary, data.cnn.total_windows || 0);
+    }
+
+    if (data.alert) {
+      const a = data.alert;
+      updateAlertNow(a.level, a.class_name, a.severity, a.message);
+      lastAlertLevel = a.level;
+      addHistory(
+        new Date().toLocaleTimeString('zh-CN', { hour12: false }),
+        a.level, a.class_name, a.severity, a.message || ''
+      );
+    }
+  }
+}
+
+function handleMessage(data) {
+  if (data.type !== 'classifyresult') return;
+
+  if (data.source === 'file_cnn' || data.source === 'file_omni') {
+    handleFileResult(data);
+    return;
+  }
+
+  handleRealtimeResult(data);
+}
+
+// ============================================================
+// 4. WebSocket Connection
+// ============================================================
+function connectDashboard() {
+  if (ws && ws.readyState === WebSocket.OPEN) return;
+
+  updateConnection('connecting', '连接中…');
+  console.log('[仪表盘] 连接:', DASHBOARD_WS_URL);
+
+  try { ws = new WebSocket(DASHBOARD_WS_URL); }
+  catch(e) { console.error('[仪表盘] 创建失败:', e); scheduleReconnect(); return; }
+
+  ws.onopen = function() {
+    console.log('[仪表盘] 已连接');
+    updateConnection('connected', '实时数据已接入');
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  };
+
+  ws.onmessage = function(event) {
+    try { handleMessage(JSON.parse(event.data)); }
+    catch(e) { console.error('[仪表盘] 解析失败:', e); }
+  };
+
+  ws.onclose = function() {
+    console.log('[仪表盘] 断开');
+    updateConnection('disconnected', '断开，重连中…');
+    scheduleReconnect();
+  };
+
+  ws.onerror = function() { console.error('[仪表盘] 连接错误'); };
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return;
+  updateConnection('disconnected', '断开，3s 后重连…');
+  function tryReconnect() {
+    console.log('[仪表盘] 重连…');
+    connectDashboard();
+    // 清除旧定时器, 设置下一次重连 (避免多个并发定时器)
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(tryReconnect, 3000);
+  }
+  reconnectTimer = setTimeout(tryReconnect, 3000);
+}
+
+// ============================================================
+// 5. Settings Panel
+// ============================================================
+const settingsOverlay = document.getElementById('settings-overlay');
+const settingsBtn = document.getElementById('settings-btn');
+const settingsWsUrl = document.getElementById('settings-ws-url');
+const settingsTestBtn = document.getElementById('settings-test-btn');
+const settingsTestResult = document.getElementById('settings-test-result');
+const settingsStatusRow = document.getElementById('settings-status-row');
+const settingsSaveBtn = document.getElementById('settings-save-btn');
+const settingsCancelBtn = document.getElementById('settings-cancel-btn');
+
+function updateSettingsIcon() {
+  const configured = getConfiguredWsUrl();
+  const isCustom = configured !== `ws://${location.hostname}:8766`;
+  settingsBtn.classList.toggle('has-config', isCustom);
+  settingsBtn.title = isCustom ? '数据源: ' + configured + ' (点击修改)' : '配置数据源地址';
+}
+updateSettingsIcon();
+
+settingsBtn.addEventListener('click', () => {
+  settingsWsUrl.value = DASHBOARD_WS_URL;
+  settingsStatusRow.style.display = 'none';
+  settingsTestBtn.textContent = '测试连接';
+  settingsTestBtn.className = 'settings-btn test';
+  settingsOverlay.classList.add('visible');
+  setTimeout(() => settingsWsUrl.focus(), 100);
+});
+
+settingsCancelBtn.addEventListener('click', () => settingsOverlay.classList.remove('visible'));
+settingsOverlay.addEventListener('click', (e) => {
+  if (e.target === settingsOverlay) settingsOverlay.classList.remove('visible');
+});
+
+settingsTestBtn.addEventListener('click', () => {
+  const url = settingsWsUrl.value.trim();
+  if (!url) return;
+  settingsTestBtn.textContent = '检测中…';
+  settingsTestBtn.className = 'settings-btn test';
+  settingsStatusRow.style.display = 'block';
+
+  const testWs = new WebSocket(url);
+  const timeout = setTimeout(() => {
+    testWs.close();
+    settingsTestBtn.textContent = '✗ 连接超时';
+    settingsTestBtn.className = 'settings-btn test fail';
+    settingsTestResult.textContent = '无法连接到 ' + url;
+    settingsTestResult.style.color = 'var(--critical)';
+  }, 5000);
+
+  testWs.onopen = () => {
+    clearTimeout(timeout);
+    testWs.close();
+    settingsTestBtn.textContent = '✓ 连接成功';
+    settingsTestBtn.className = 'settings-btn test ok';
+    settingsTestResult.textContent = 'WebSocket 数据源 ' + url + ' 响应正常';
+    settingsTestResult.style.color = 'var(--accent)';
+  };
+  testWs.onerror = () => {
+    clearTimeout(timeout);
+    settingsTestBtn.textContent = '✗ 连接失败';
+    settingsTestBtn.className = 'settings-btn test fail';
+    settingsTestResult.textContent = '无法连接到 ' + url;
+    settingsTestResult.style.color = 'var(--critical)';
+  };
+});
+
+settingsSaveBtn.addEventListener('click', () => {
+  const url = settingsWsUrl.value.trim();
+  if (!url) return;
+  localStorage.setItem('dashboard_ws_url', url);
+  DASHBOARD_WS_URL = url;
+  updateSettingsIcon();
+  settingsOverlay.classList.remove('visible');
+  if (ws) { ws.onclose = null; ws.close(); ws = null; }
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  connectDashboard();
+});
+
+// ============================================================
+// 6. Keyboard Shortcuts
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 'f') {
+    e.preventDefault();
+    window.open('/frontend-panel.html', '_blank');
+  }
+});
+
+// ============================================================
+// 7. Init
+// ============================================================
+console.log('◈ 后端监控面板 v4 已就绪');
+console.log('  WebSocket: ' + DASHBOARD_WS_URL);
+console.log('  Ctrl+F → 打开前端采集面板');
+connectDashboard();
+</script>
+</body>
+</html>

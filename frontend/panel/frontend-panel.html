@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音频采集前端 · 双机实时监测系统</title>
+<style>
+/* ============================================================
+   DESIGN ASSUMPTIONS (Junior Pass · huashu-design)
+   ------------------------------------------------------------
+   1. 融入现有暗色指挥中心设计语言（CSS 变量与 backend-dashboard 统一）
+   2. 暗色在此场景是功能性选择（低光监控 + 答辩投影），不是 slop
+   3. 录音按钮是 Hero 交互 — 大圆形脉冲按钮，答辩演示最抓眼
+   4. 三 Tab 信息架构扁平：文件上传 | 实时录音 | 结果历史
+   5. 反 slop：不用 emoji 做主要图标、不画 SVG 人脸、不做紫渐变
+   6. 排版细节：中文引号「」、letter-spacing 分毫调整、text-wrap: pretty
+   7. 录音状态用 CSS 动画传达，不靠文字堆砌
+   ============================================================ */
+
+/* ---- CSS Custom Properties (与 backend-dashboard 统一) ---- */
+:root {
+  --bg-deep:    #060d15;
+  --bg-surface: #0c1520;
+  --bg-card:    #101a28;
+  --bg-card-hover: #141e30;
+  --border:     #1a2738;
+  --border-active: #2a3a50;
+  --text-primary:   #e2e8f2;
+  --text-secondary: #6b7d95;
+  --text-muted:     #3d4f65;
+  --accent:      #00e5a0;
+  --accent-dim:  #006b4a;
+  --warning:     #f0a030;
+  --warning-dim: #6b3d00;
+  --critical:    #ff4040;
+  --critical-dim:#6b1010;
+  --info:        #4090e0;
+  --info-dim:    #102850;
+  --font-display: 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+  --font-mono:   'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+
+/* ---- Reset & Base ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(rgba(64,144,224,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(64,144,224,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ---- Top Bar ---- */
+.top-bar {
+  height: 44px;
+  background: rgba(6,13,21,0.85);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 20;
+  position: relative;
+}
+.top-bar-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+}
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.top-bar-link {
+  color: var(--info);
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s;
+}
+.top-bar-link:hover { color: #60a8f0; }
+
+/* ---- Connection Status ---- */
+.conn-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.conn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-dim);
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.conn-dot.offline {
+  background: var(--critical);
+  box-shadow: 0 0 8px var(--critical-dim);
+  animation: pulse-offline 1.5s ease-in-out infinite;
+}
+.conn-dot.checking {
+  background: var(--warning);
+  box-shadow: 0 0 8px var(--warning-dim);
+  animation: pulse-offline 0.8s ease-in-out infinite;
+}
+@keyframes pulse-offline {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Omni cloud status */
+.conn-divider {
+  width: 1px; height: 16px;
+  background: var(--border);
+  margin: 0 4px;
+}
+.conn-omni {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.conn-omni-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-dim);
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.conn-omni-dot.offline {
+  background: var(--text-muted);
+  box-shadow: none;
+}
+.conn-omni-dot.checking {
+  background: var(--warning);
+  box-shadow: 0 0 6px var(--warning-dim);
+  animation: pulse-offline 0.8s ease-in-out infinite;
+}
+.conn-omni-label {
+  color: var(--text-secondary);
+  transition: color 0.4s;
+}
+.conn-omni-label.online { color: var(--accent); }
+.conn-omni-label.offline { color: var(--text-muted); }
+
+/* ---- Main Layout ---- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 44px);
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 20px 24px 16px;
+  gap: 0;
+}
+
+/* ---- Tab Navigation ---- */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+.tab-btn {
+  padding: 10px 28px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-display);
+  letter-spacing: 0.05em;
+  position: relative;
+  transition: color 0.25s;
+}
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--info);
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+.tab-btn:hover { color: var(--text-secondary); }
+.tab-btn.active {
+  color: var(--text-primary);
+}
+.tab-btn.active::after {
+  transform: scaleX(1);
+}
+.tab-icon {
+  display: inline-block;
+  width: 18px;
+  text-align: center;
+  margin-right: 6px;
+  opacity: 0.7;
+}
+
+/* ---- Tab Panels ---- */
+.tab-panel {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+.tab-panel.active { display: flex; }
+.tab-panel::-webkit-scrollbar { width: 4px; }
+.tab-panel::-webkit-scrollbar-track { background: transparent; }
+.tab-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ============================================================
+   TAB 1: FILE UPLOAD
+   ============================================================ */
+
+/* Mode Toggle */
+.mode-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  align-self: center;
+}
+.mode-btn {
+  padding: 10px 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+}
+.mode-btn.active {
+  background: var(--info);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(64,144,224,0.25);
+  transform: scale(1.02);
+  z-index: 1;
+}
+/* ★ Omni 模式激活时用 accent 绿色区分 */
+.mode-btn.active.omni-active {
+  background: var(--accent);
+  box-shadow: 0 0 20px rgba(0,229,160,0.3);
+  color: #060d15;
+}
+.mode-btn:first-child { border-right: 1px solid var(--border); }
+.mode-btn:not(.active):hover { color: var(--text-primary); background: rgba(255,255,255,0.03); }
+
+/* Drop Zone */
+.drop-zone {
+  background: var(--bg-card);
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 44px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+/* ★ 空闲时呼吸动画引导用户交互 */
+.drop-zone.idle {
+  animation: drop-breathe 3s ease-in-out infinite;
+}
+@keyframes drop-breathe {
+  0%, 100% { border-color: var(--border); }
+  50%      { border-color: rgba(64,144,224,0.25); }
+}
+.drop-zone:hover {
+  border-color: var(--border-active);
+  background: var(--bg-card-hover);
+}
+.drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(0,229,160,0.04);
+  box-shadow: 0 0 32px rgba(0,229,160,0.05);
+}
+.drop-zone.has-file {
+  border-color: var(--accent);
+  border-style: solid;
+  background: rgba(0,229,160,0.025);
+  animation: none; /* 有文件时停止呼吸 */
+}
+.drop-icon-svg {
+  width: 44px; height: 44px;
+  margin: 0 auto 14px;
+  opacity: 0.5;
+  color: var(--text-secondary);
+}
+.drop-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+.drop-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.drop-file-name {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.drop-file-size {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+input[type="file"] { display: none; }
+
+/* Action Button */
+.action-btn {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 13px 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--info);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  transition: all 0.3s;
+}
+.action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.action-btn:not(:disabled):hover {
+  background: #5098e8;
+  box-shadow: 0 0 28px rgba(64,144,224,0.35);
+  transform: translateY(-1px);
+}
+.action-btn.loading {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: wait;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid var(--text-muted);
+  border-top-color: var(--info);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   TAB 2: LIVE RECORDING
+   ============================================================ */
+
+.recording-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+/* Duration Selector */
+.duration-selector {
+  display: flex;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+}
+.duration-chip {
+  padding: 7px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+}
+.duration-chip:hover { color: var(--text-primary); }
+.duration-chip.active {
+  background: var(--info);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(64,144,224,0.2);
+}
+
+/* Record Button — the Hero element */
+.record-btn-wrap {
+  position: relative;
+  width: 120px; height: 120px;
+}
+.record-btn {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  border: 3px solid var(--info);
+  background: rgba(64,144,224,0.08);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  transition: all 0.35s ease;
+  position: relative;
+  z-index: 2;
+}
+.record-btn:hover {
+  background: rgba(64,144,224,0.15);
+  box-shadow: 0 0 36px rgba(64,144,224,0.2);
+  transform: scale(1.04);
+}
+.record-btn:active {
+  transform: scale(0.96);
+}
+/* Recording state */
+.record-btn.recording {
+  border-color: var(--critical);
+  background: rgba(255,64,64,0.12);
+  animation: record-pulse 1.4s ease-in-out infinite;
+}
+.record-btn.recording:hover {
+  box-shadow: 0 0 40px rgba(255,64,64,0.25);
+}
+@keyframes record-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,64,64,0.35); }
+  50%      { box-shadow: 0 0 0 20px rgba(255,64,64,0); }
+}
+/* Analyzing state */
+.record-btn.analyzing {
+  border-color: var(--warning);
+  background: rgba(240,160,48,0.08);
+  pointer-events: none;
+}
+
+.record-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  transition: color 0.3s;
+}
+.record-hint.recording { color: var(--critical); }
+.record-hint.analyzing { color: var(--warning); }
+
+/* Live waveform during recording */
+.record-waveform {
+  width: 100%;
+  max-width: 400px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.record-waveform .wf-bar {
+  flex: 1;
+  min-width: 3px;
+  background: var(--info-dim);
+  border-radius: 2px;
+  transition: height 0.06s ease, background 0.15s;
+  height: 4px;
+}
+.record-waveform.active .wf-bar {
+  background: var(--info);
+}
+
+/* Loop toggle */
+.loop-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.toggle-switch {
+  width: 40px; height: 22px;
+  background: var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.3s;
+  border: 1px solid var(--border-active);
+}
+.toggle-switch.on {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: all 0.3s;
+}
+.toggle-switch.on::after {
+  left: 20px;
+  background: var(--accent);
+}
+
+/* ============================================================
+   TAB 3: RESULTS HISTORY
+   ============================================================ */
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.result-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: cardIn 0.35s ease-out;
+  transition: border-color 0.3s;
+}
+.result-card:hover { border-color: var(--border-active); }
+.result-card.danger { border-left: 3px solid var(--critical); }
+.result-card.caution { border-left: 3px solid var(--warning); }
+.result-card.safe { border-left: 3px solid var(--accent); }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-emoji {
+  font-size: 32px;
+  flex-shrink: 0;
+  width: 44px;
+  text-align: center;
+  line-height: 1;
+}
+.result-info {
+  flex: 1;
+  min-width: 0;
+}
+.result-label {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.result-label.danger  { color: var(--critical); }
+.result-label.caution { color: var(--warning); }
+.result-label.safe    { color: var(--accent); }
+.result-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.result-meta span { white-space: nowrap; }
+.result-source {
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.result-source.cnn  { background: var(--info-dim); color: var(--info); }
+.result-source.omni { background: var(--accent-dim); color: var(--accent); }
+.result-source.rec  { background: rgba(255,255,255,0.04); color: var(--text-muted); }
+
+.results-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+.results-empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+.results-empty-text {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   RESULT DETAIL (inline expand)
+   ============================================================ */
+
+.result-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+  margin-top: 0;
+  overflow: hidden;
+}
+.result-detail.open {
+  grid-template-rows: 1fr;
+  margin-top: 12px;
+}
+.result-detail > div {
+  overflow: hidden;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.detail-item {
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+.detail-item.full { grid-column: 1 / -1; }
+.detail-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.detail-value {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+.detail-value.transcript {
+  font-style: italic;
+  color: var(--accent);
+  font-size: 15px;
+}
+
+/* Class bars */
+.class-bars { display: flex; flex-direction: column; gap: 5px; }
+.class-bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.class-bar-label { width: 36px; text-align: right; color: var(--text-secondary); flex-shrink: 0; }
+.class-bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; }
+.class-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.class-bar-val { width: 36px; font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; text-align: left; }
+
+/* Keyword tags */
+.keyword-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.keyword-tag {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--critical-dim);
+  color: var(--critical);
+  letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   ERROR TOAST
+   ============================================================ */
+
+.error-toast {
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--critical-dim);
+  border: 1px solid var(--critical);
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--critical);
+  z-index: 100;
+  display: none;
+  max-width: 500px;
+  text-align: center;
+  animation: toastIn 0.3s ease-out;
+}
+.error-toast.visible { display: block; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ============================================================
+   SETTINGS OVERLAY
+   ============================================================ */
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.settings-overlay.visible { display: flex; }
+.settings-dialog {
+  background: var(--bg-card);
+  border: 1px solid var(--border-active);
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 420px;
+  max-width: 90vw;
+}
+.settings-dialog h3 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.settings-row label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.settings-row input {
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.settings-row input:focus { border-color: var(--info); }
+.settings-row .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.settings-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.settings-btn {
+  padding: 9px 22px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+.settings-btn.primary {
+  background: var(--info);
+  color: #fff;
+  border: none;
+}
+.settings-btn.primary:hover { background: #5098e8; }
+.settings-btn.secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.settings-btn.secondary:hover { color: var(--text-primary); border-color: var(--border-active); }
+.settings-btn.test {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  margin-right: auto;
+}
+.settings-btn.test:hover { background: rgba(0,229,160,0.06); }
+.settings-btn.test.success { color: var(--accent); border-color: var(--accent); }
+.settings-btn.test.fail { color: var(--critical); border-color: var(--critical); }
+
+/* Settings gear icon */
+.top-bar-settings {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+.top-bar-settings:hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
+.top-bar-settings.has-config { color: var(--accent); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.panel-footer {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 6px 0 0;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.panel-footer a { color: var(--info); text-decoration: none; }
+.panel-footer a:hover { text-decoration: underline; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width: 1200px) {
+  .panel { max-width: 860px; }
+}
+@media (max-width: 600px) {
+  .tab-btn { padding: 10px 16px 12px; font-size: 13px; }
+  .record-btn-wrap { width: 96px; height: 96px; }
+  .record-btn { width: 96px; height: 96px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<div class="top-bar">
+  <span class="top-bar-title">◈ 音频采集前端 · 双机实时监测系统</span>
+  <div class="top-bar-right">
+    <a class="top-bar-link" href="/backend-dashboard.html" target="_blank">后端监控</a>
+    <button class="top-bar-settings" id="settings-btn" title="配置后端地址">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="2.5"/>
+        <path d="M8 1.5v1.2M8 13.3v1.2M1.5 8h1.2M13.3 8h1.2M3.4 3.4l.85.85M11.75 11.75l.85.85M3.4 12.6l.85-.85M11.75 4.25l.85-.85"/>
+      </svg>
+    </button>
+    <div class="conn-status" id="conn-status">
+      <span class="conn-dot checking" id="conn-dot"></span>
+      <span id="conn-label">检测中…</span>
+    </div>
+    <span class="conn-divider"></span>
+    <div class="conn-omni" id="conn-omni">
+      <span class="conn-omni-dot checking" id="conn-omni-dot"></span>
+      <span class="conn-omni-label" id="conn-omni-label">Omni 检测中…</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SETTINGS OVERLAY
+     ============================================================ -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-dialog">
+    <h3>后端服务器配置</h3>
+    <div class="settings-row">
+      <label>后端 API 地址</label>
+      <input type="text" id="settings-backend-url"
+             placeholder="例如: http://192.168.1.100:8080"
+             autocomplete="off" spellcheck="false">
+      <span class="hint">输入后端机器的 IP 和端口。前端录音/文件上传都将发送到此地址。确保两台电脑在同一局域网且可以 Ping 通。</span>
+    </div>
+    <div class="settings-row" id="settings-status-row" style="display:none">
+      <span id="settings-test-result" style="font-size:12px;"></span>
+    </div>
+    <div class="settings-actions">
+      <button class="settings-btn test" id="settings-test-btn">测试连接</button>
+      <button class="settings-btn secondary" id="settings-cancel-btn">取消</button>
+      <button class="settings-btn primary" id="settings-save-btn">保存并连接</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ERROR TOAST
+     ============================================================ -->
+<div class="error-toast" id="error-toast"></div>
+
+<!-- ============================================================
+     MAIN PANEL
+     ============================================================ -->
+<div class="panel">
+
+  <!-- Tab Navigation -->
+  <nav class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" data-tab="upload">
+      <span class="tab-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 11V2M4 6l4-4 4 4M2 10v3h12v-3"/></svg></span>
+      文件上传
+    </button>
+    <button class="tab-btn" data-tab="record">
+      <span class="tab-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><path d="M5.5 2.5h5M8 11v3"/></svg></span>
+      实时录音
+    </button>
+    <button class="tab-btn" data-tab="results">
+      <span class="tab-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg></span>
+      分析结果
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       TAB 1: FILE UPLOAD
+       ============================================================ -->
+  <div class="tab-panel active" id="panel-upload">
+
+    <!-- Mode Toggle -->
+    <div class="mode-toggle" id="mode-toggle">
+      <button class="mode-btn active" data-mode="cnn">⚡ CNN 本地分析</button>
+      <button class="mode-btn" data-mode="omni">☁ Omni 云端智能体</button>
+    </div>
+
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="drop-zone">
+      <svg class="drop-icon-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="8" y="10" width="32" height="28" rx="4"/>
+        <circle cx="24" cy="22" r="5"/>
+        <circle cx="24" cy="22" r="2" fill="currentColor"/>
+        <path d="M16 34a16 14 0 0 1 16 0"/>
+      </svg>
+      <div class="drop-title">拖放音频文件到此处</div>
+      <div class="drop-subtitle">或点击选择 · 支持 WAV / MP3 / FLAC / M4A</div>
+      <div class="drop-file-name" id="file-name" style="display:none"></div>
+      <div class="drop-file-size" id="file-size" style="display:none"></div>
+      <input type="file" id="file-input" accept="audio/*,.wav,.mp3,.flac,.m4a,.ogg,.aac,.wma,.webm">
+    </div>
+
+    <!-- Action Button -->
+    <button class="action-btn" id="analyze-btn" disabled>
+      <span id="btn-text">选择文件开始分析</span>
+    </button>
+
+  </div>
+
+  <!-- ============================================================
+       TAB 2: LIVE RECORDING
+       ============================================================ -->
+  <div class="tab-panel" id="panel-record">
+
+    <!-- Mode Toggle -->
+    <div class="mode-toggle" id="record-mode-toggle">
+      <button class="mode-btn active" data-mode="cnn">⚡ CNN 本地分析</button>
+      <button class="mode-btn" data-mode="omni">☁ Omni 云端智能体</button>
+    </div>
+
+    <div class="recording-area">
+      <!-- Duration -->
+      <div class="duration-selector" id="duration-selector">
+        <button class="duration-chip" data-dur="2">2 秒</button>
+        <button class="duration-chip active" data-dur="3">3 秒</button>
+        <button class="duration-chip" data-dur="5">5 秒</button>
+        <button class="duration-chip" data-dur="10">10 秒</button>
+      </div>
+
+      <!-- Record Button -->
+      <div class="record-btn-wrap">
+        <button class="record-btn" id="record-btn" title="点击开始录音">
+          开始录音
+        </button>
+      </div>
+
+      <!-- Hint -->
+      <div class="record-hint" id="record-hint">点击上方按钮，录制 3 秒音频</div>
+
+      <!-- Waveform -->
+      <div class="record-waveform" id="record-waveform">
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+        <span class="wf-bar"></span><span class="wf-bar"></span><span class="wf-bar"></span>
+      </div>
+
+      <!-- Loop -->
+      <div class="loop-row">
+        <div class="toggle-switch" id="loop-toggle"></div>
+        <span>循环模式：每隔设定时长自动录音分析</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       TAB 3: RESULTS
+       ============================================================ -->
+  <div class="tab-panel" id="panel-results">
+    <div class="results-list" id="results-list">
+      <div class="results-empty">
+        <div class="results-empty-icon">◈</div>
+        <div class="results-empty-text">
+          暂无分析结果<br>
+          <span style="color:var(--text-muted);font-size:12px;">上传文件或录制音频后将在此显示</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="panel-footer">
+    后端: <span id="api-url-display" style="font-family:var(--font-mono)">--</span> &nbsp;·&nbsp;
+    <a href="#" id="clear-results">清除结果记录</a>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// Constants
+// ============================================================
+const CLASS_CN = { normal:'正常', scream:'尖叫', cry:'大哭', laugh:'大笑', silence:'静音' };
+const CLASS_COLORS = { normal:'#00e5a0', scream:'#ff4040', cry:'#f0a030', laugh:'#4090e0', silence:'#3d4f65' };
+const DANGER_CLASS = { '危险':'danger', '关注':'caution', '正常':'safe' };
+
+// ============================================================
+// Backend URL Configuration
+//  优先级: URL 参数 ?backend= → localStorage → 当前页面 origin
+// ============================================================
+function getConfiguredBackend() {
+  // 1. URL 参数 (最高优先级)
+  const params = new URLSearchParams(window.location.search);
+  const urlParam = params.get('backend');
+  if (urlParam) {
+    // 自动补全 http://
+    let url = urlParam.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'http://' + url;
+    }
+    // 去掉尾部斜杠
+    url = url.replace(/\/+$/, '');
+    localStorage.setItem('backend_url', url);
+    return url;
+  }
+  // 2. localStorage
+  const saved = localStorage.getItem('backend_url');
+  if (saved) return saved.replace(/\/+$/, '');
+  // 3. 当前页面 origin (同源部署)
+  return window.location.origin;
+}
+
+let API_BASE = getConfiguredBackend();
+
+// ============================================================
+// Global State
+// ============================================================
+let currentTab = 'upload';
+let currentMode = 'cnn';        // 'cnn' | 'omni'
+let recordMode = 'cnn';        // independent mode for recording tab
+let selectedFile = null;
+let isAnalyzing = false;
+let isRecording = false;
+let recordDuration = 3;        // seconds
+let recordLoop = false;
+let loopTimer = null;
+let mediaRecorder = null;
+let mediaStream = null;
+let audioCtx = null;            // AudioContext for real waveform
+let analyserNode = null;        // AnalyserNode for real waveform
+let recordingStartTime = 0;     // Date.now() for absolute-timing (survives bg throttle)
+let wakeLock = null;            // Screen Wake Lock for background recording
+let analysisResults = [];      // history
+let backendOnline = false;
+let omniOnline = false;
+
+// ============================================================
+// DOM References
+// ============================================================
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+// Top bar
+const connDot = $('#conn-dot');
+const connLabel = $('#conn-label');
+const connOmniDot = $('#conn-omni-dot');
+const connOmniLabel = $('#conn-omni-label');
+
+// Tabs
+const tabNav = $('#tab-nav');
+const tabBtns = $$('.tab-btn');
+const tabPanels = $$('.tab-panel');
+
+// Upload tab
+const modeToggle = $('#mode-toggle');
+const modeBtns = $$('#mode-toggle .mode-btn');
+const dropZone = $('#drop-zone');
+const fileInput = $('#file-input');
+const fileNameEl = $('#file-name');
+const fileSizeEl = $('#file-size');
+const analyzeBtn = $('#analyze-btn');
+const btnText = $('#btn-text');
+const apiUrlDisplay = $('#api-url-display');
+
+// Record tab
+const recordModeToggle = $('#record-mode-toggle');
+const recordModeBtns = $$('#record-mode-toggle .mode-btn');
+const durationSelector = $('#duration-selector');
+const durationChips = $$('#duration-selector .duration-chip');
+const recordBtn = $('#record-btn');
+const recordHint = $('#record-hint');
+const recordWaveform = $('#record-waveform');
+const loopToggle = $('#loop-toggle');
+
+// Results tab
+const resultsList = $('#results-list');
+
+// Error toast
+const errorToast = $('#error-toast');
+let errorTimer = null;
+
+// ============================================================
+// API Utilities
+// ============================================================
+function getEndpoint() {
+  return (currentTab === 'record' ? recordMode : currentMode) === 'omni'
+    ? '/api/omni' : '/api/analyze';
+}
+
+function getApiUrl() {
+  return API_BASE + getEndpoint();
+}
+
+function getDisplayApiUrl() {
+  return API_BASE + getEndpoint();
+}
+
+// ============================================================
+// Connection Check
+// ============================================================
+async function checkConnection() {
+  // Check CNN backend
+  connDot.className = 'conn-dot checking';
+  connLabel.textContent = '检测中…';
+  try {
+    const resp = await fetch(API_BASE + '/api/analyze', { method: 'OPTIONS' });
+    backendOnline = true;
+    connDot.className = 'conn-dot';
+    connLabel.textContent = '后端就绪';
+    connLabel.style.color = 'var(--accent)';
+  } catch(e) {
+    backendOnline = false;
+    connDot.className = 'conn-dot offline';
+    connLabel.textContent = '后端未连接';
+    connLabel.style.color = 'var(--text-secondary)';
+  }
+
+  // Check Omni cloud agent
+  connOmniDot.className = 'conn-omni-dot checking';
+  connOmniLabel.textContent = 'Omni 检测中…';
+  connOmniLabel.className = 'conn-omni-label';
+  try {
+    const resp = await fetch(API_BASE + '/api/omni', { method: 'OPTIONS' });
+    omniOnline = true;
+    connOmniDot.className = 'conn-omni-dot';
+    connOmniLabel.textContent = 'Omni 就绪';
+    connOmniLabel.className = 'conn-omni-label online';
+  } catch(e) {
+    omniOnline = false;
+    connOmniDot.className = 'conn-omni-dot offline';
+    connOmniLabel.textContent = 'Omni 不可用';
+    connOmniLabel.className = 'conn-omni-label offline';
+  }
+}
+checkConnection();
+setInterval(checkConnection, 30000);
+
+// ============================================================
+// Settings Panel
+// ============================================================
+const settingsOverlay = $('#settings-overlay');
+const settingsBtn = $('#settings-btn');
+const settingsBackendUrl = $('#settings-backend-url');
+const settingsTestBtn = $('#settings-test-btn');
+const settingsTestResult = $('#settings-test-result');
+const settingsStatusRow = $('#settings-status-row');
+const settingsSaveBtn = $('#settings-save-btn');
+const settingsCancelBtn = $('#settings-cancel-btn');
+
+// Update gear icon if custom backend is configured
+function updateSettingsIcon() {
+  const configured = getConfiguredBackend();
+  const isCustom = configured !== window.location.origin;
+  settingsBtn.classList.toggle('has-config', isCustom);
+  settingsBtn.title = isCustom ? '后端地址: ' + configured + ' (点击修改)' : '配置后端地址';
+}
+updateSettingsIcon();
+
+settingsBtn.addEventListener('click', () => {
+  settingsBackendUrl.value = API_BASE;
+  settingsStatusRow.style.display = 'none';
+  settingsTestBtn.textContent = '测试连接';
+  settingsTestBtn.className = 'settings-btn test';
+  settingsOverlay.classList.add('visible');
+  setTimeout(() => settingsBackendUrl.focus(), 100);
+});
+
+settingsCancelBtn.addEventListener('click', closeSettings);
+settingsOverlay.addEventListener('click', (e) => {
+  if (e.target === settingsOverlay) closeSettings();
+});
+
+function closeSettings() {
+  settingsOverlay.classList.remove('visible');
+}
+
+settingsTestBtn.addEventListener('click', async () => {
+  const url = settingsBackendUrl.value.trim().replace(/\/+$/, '');
+  if (!url) return;
+
+  settingsTestBtn.textContent = '检测中…';
+  settingsTestBtn.className = 'settings-btn test';
+  settingsStatusRow.style.display = 'block';
+  settingsTestResult.textContent = '';
+  settingsTestResult.style.color = 'var(--text-secondary)';
+
+  try {
+    const resp = await fetch(url + '/api/analyze', {
+      method: 'OPTIONS',
+      signal: AbortSignal.timeout(5000),
+    });
+    settingsTestBtn.textContent = '✓ 连接成功';
+    settingsTestBtn.className = 'settings-btn test success';
+    settingsTestResult.textContent = '后端 ' + url + ' 响应正常';
+    settingsTestResult.style.color = 'var(--accent)';
+  } catch(e) {
+    settingsTestBtn.textContent = '✗ 连接失败';
+    settingsTestBtn.className = 'settings-btn test fail';
+    settingsTestResult.textContent = '无法连接到 ' + url + ' —— 请确认 IP 正确且后端已启动';
+    settingsTestResult.style.color = 'var(--critical)';
+  }
+  settingsStatusRow.style.display = 'block';
+});
+
+settingsSaveBtn.addEventListener('click', () => {
+  let url = settingsBackendUrl.value.trim().replace(/\/+$/, '');
+  if (!url) return;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'http://' + url;
+  }
+  localStorage.setItem('backend_url', url);
+  API_BASE = url;
+  updateApiUrlDisplay();
+  updateSettingsIcon();
+  closeSettings();
+  // 立即重检连接
+  checkConnection();
+});
+
+// ============================================================
+// Toast
+// ============================================================
+function showToast(msg, duration = 4000) {
+  errorToast.textContent = msg;
+  errorToast.classList.add('visible');
+  if (errorTimer) clearTimeout(errorTimer);
+  errorTimer = setTimeout(() => {
+    errorToast.classList.remove('visible');
+  }, duration);
+}
+
+// ============================================================
+// Tab Switching
+// ============================================================
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    switchTab(tab);
+  });
+});
+
+function switchTab(tab) {
+  currentTab = tab;
+  tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  tabPanels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+  updateApiUrlDisplay();
+
+  // If switching to results, re-render
+  if (tab === 'results') renderResults();
+}
+
+function updateApiUrlDisplay() {
+  const ep = getEndpoint();
+  apiUrlDisplay.textContent = API_BASE + ep;
+}
+
+// ============================================================
+// Mode Toggles
+// ============================================================
+modeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    modeBtns.forEach(b => { b.classList.remove('active', 'omni-active'); });
+    btn.classList.add('active');
+    if (btn.dataset.mode === 'omni') btn.classList.add('omni-active');
+    currentMode = btn.dataset.mode;
+    updateApiUrlDisplay();
+    updateAnalyzeBtn();
+  });
+});
+
+// 初始化 Omni 按钮的视觉差异
+document.querySelectorAll('#mode-toggle .mode-btn[data-mode="omni"], #record-mode-toggle .mode-btn[data-mode="omni"]')
+  .forEach(b => b.classList.add('omni-mode'));
+
+recordModeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    recordModeBtns.forEach(b => { b.classList.remove('active', 'omni-active'); });
+    btn.classList.add('active');
+    if (btn.dataset.mode === 'omni') btn.classList.add('omni-active');
+    recordMode = btn.dataset.mode;
+    updateApiUrlDisplay();
+  });
+});
+
+// ============================================================
+// TAB 1: File Upload Logic
+// ============================================================
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) handleFile(files[0]);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length > 0) handleFile(fileInput.files[0]);
+});
+
+function handleFile(file) {
+  const validExts = ['.wav', '.mp3', '.flac', '.m4a', '.ogg', '.aac', '.wma', '.wave', '.webm', '.mp4', '.m4b', '.aiff', '.aif', '.wav'];
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+
+  // 扩展名优先判断 (比 MIME type 更可靠，某些系统 M4A 报告为 video/mp4)
+  const validByExt = validExts.includes(ext);
+  const validByMime = file.type && (
+    file.type.startsWith('audio/') ||
+    file.type === 'video/mp4'        // M4A 在 Windows 上常被识别为 video/mp4
+  );
+
+  if (!validByExt && !validByMime) {
+    showToast('不支持的文件格式（' + ext + '）。请使用 WAV / MP3 / FLAC / M4A / WebM 等音频文件。');
+    return;
+  }
+  if (file.size > 100 * 1024 * 1024) {
+    showToast('文件过大（超过 100MB）。');
+    return;
+  }
+
+  selectedFile = file;
+  dropZone.classList.remove('idle');
+  dropZone.classList.add('has-file');
+  fileNameEl.textContent = file.name;
+  fileNameEl.style.display = 'block';
+  fileSizeEl.textContent = formatSize(file.size);
+  fileSizeEl.style.display = 'block';
+  updateAnalyzeBtn();
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function updateAnalyzeBtn() {
+  if (!selectedFile || isAnalyzing) {
+    analyzeBtn.disabled = true;
+    if (!isAnalyzing) btnText.textContent = '选择文件开始分析';
+  } else {
+    analyzeBtn.disabled = false;
+    btnText.textContent = '开始' + (currentMode === 'omni' ? ' Omni 云端' : ' CNN 本地') + '分析';
+  }
+}
+
+analyzeBtn.addEventListener('click', () => {
+  if (!selectedFile || isAnalyzing) return;
+  startFileAnalysis();
+});
+
+async function startFileAnalysis() {
+  isAnalyzing = true;
+  analyzeBtn.disabled = true;
+  analyzeBtn.classList.add('loading');
+  btnText.innerHTML = '<span class="spinner"></span>分析中…';
+
+  const formData = new FormData();
+  formData.append('file', selectedFile, selectedFile.name);
+
+  try {
+    const resp = await fetch(getApiUrl(), { method: 'POST', body: formData });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error('Server ' + resp.status + ': ' + text.slice(0, 200));
+    }
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    // Add to results
+    addResult({
+      type: currentMode,
+      source: 'file',
+      timestamp: Date.now(),
+      data: data,
+      fileName: selectedFile.name,
+    });
+
+    // Show result inline and switch to results tab
+    switchTab('results');
+
+  } catch(err) {
+    showToast(err.message || '分析请求失败');
+  } finally {
+    isAnalyzing = false;
+    analyzeBtn.disabled = false;
+    analyzeBtn.classList.remove('loading');
+    updateAnalyzeBtn();
+  }
+}
+
+// ============================================================
+// TAB 2: Recording Logic
+// ============================================================
+
+// Duration selector
+durationChips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    durationChips.forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    recordDuration = parseInt(chip.dataset.dur);
+    if (!isRecording) {
+      recordHint.textContent = '点击上方按钮，录制 ' + recordDuration + ' 秒音频';
+    }
+  });
+});
+
+// Loop toggle
+loopToggle.addEventListener('click', () => {
+  recordLoop = !recordLoop;
+  loopToggle.classList.toggle('on', recordLoop);
+  if (!recordLoop && loopTimer) {
+    clearTimeout(loopTimer);
+    loopTimer = null;
+  }
+});
+
+// Record button
+recordBtn.addEventListener('click', () => {
+  if (isRecording) return;
+  if (isAnalyzing) return;
+  startRecording();
+});
+
+// ---- AudioContext 自动恢复 (后台标签页切回时) ----
+function _setupAudioContextResilience() {
+  if (!audioCtx) return;
+  audioCtx.onstatechange = () => {
+    if (audioCtx.state === 'suspended') {
+      console.log('[录音] AudioContext 被浏览器暂停, 尝试恢复…');
+      audioCtx.resume().then(() => {
+        console.log('[录音] AudioContext 已恢复');
+      }).catch(e => console.warn('[录音] 恢复失败:', e));
+    }
+  };
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  // AudioContext 恢复
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+  // ★ 循环录音: 页面切回时立即检查是否需要续录
+  if (recordLoop && backendOnline && !isRecording && !isAnalyzing) {
+    if (loopTimer) { clearTimeout(loopTimer); loopTimer = null; }
+    console.log('[循环] 页面恢复可见, 续启录音');
+    loopTimer = setTimeout(() => {
+      if (recordLoop && !isRecording && !isAnalyzing && backendOnline) {
+        startRecording();
+      }
+    }, 300);
+  }
+});
+
+async function startRecording() {
+  if (!backendOnline) {
+    showToast('后端未连接，无法录音分析');
+    return;
+  }
+
+  // 检查浏览器是否支持录音 API
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showToast('您的浏览器不支持麦克风录音。请使用 Chrome、Edge 或 Firefox 最新版本。');
+    return;
+  }
+
+  // 安全上下文检测: 浏览器只允许 localhost 或 HTTPS 页面使用麦克风
+  const isLocalhost = location.hostname === 'localhost'
+    || location.hostname === '127.0.0.1'
+    || location.hostname === '[::1]';
+  if (!window.isSecureContext && !isLocalhost) {
+    showToast(
+      '麦克风被浏览器阻止：远程 HTTP 页面不能使用麦克风。' +
+      '请在本机双击 start.bat 启动（会自动打开 localhost 页面），' +
+      '然后在设置里配置后端 IP 即可。',
+      8000
+    );
+    return;
+  }
+
+  // Request microphone
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch(err) {
+    if (err.name === 'NotAllowedError') {
+      showToast('麦克风权限被拒绝。请在浏览器设置中允许访问麦克风。');
+    } else if (err.name === 'NotFoundError') {
+      showToast('未检测到麦克风设备。');
+    } else {
+      showToast('麦克风访问失败: ' + err.message);
+    }
+    return;
+  }
+
+  // ★ 设置 AudioContext + AnalyserNode (真实波形可视化)
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyserNode = audioCtx.createAnalyser();
+    analyserNode.fftSize = 256;
+    analyserNode.smoothingTimeConstant = 0.6;
+    const source = audioCtx.createMediaStreamSource(mediaStream);
+    source.connect(analyserNode);
+    // 不连接到 destination (避免回声)
+    _setupAudioContextResilience();
+  } catch(e) {
+    console.warn('AudioContext 创建失败, 波形将降级为随机动画:', e);
+    audioCtx = null; analyserNode = null;
+  }
+
+  // ★ Wake Lock: 防止屏幕休眠导致录音中断
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+      console.log('[录音] Wake Lock 已激活');
+    } catch(e) { /* 用户拒绝或浏览器不支持 */ }
+  }
+
+  // Determine MIME type
+  let mimeType = 'audio/webm;codecs=opus';
+  if (!MediaRecorder.isTypeSupported(mimeType)) {
+    mimeType = 'audio/webm';
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = 'audio/mp4';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = '';
+      }
+    }
+  }
+
+  const chunks = [];
+  const recorderOpts = mimeType ? { mimeType } : {};
+  mediaRecorder = new MediaRecorder(mediaStream, recorderOpts);
+
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) chunks.push(e.data);
+    // ★ 后台标签页定时器被节流时, 用 dataavailable 事件做兜底计时
+    if (isRecording && recordingStartTime > 0) {
+      const elapsed = (Date.now() - recordingStartTime) / 1000;
+      if (elapsed >= recordDuration) {
+        stopRecording();
+      }
+    }
+  };
+
+  mediaRecorder.onstop = async () => {
+    // Stop mic
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(t => t.stop());
+      mediaStream = null;
+    }
+    // Release Wake Lock
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+      wakeLock = null;
+    }
+
+    const blob = new Blob(chunks, { type: mimeType || 'audio/webm' });
+    const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+    const fileName = 'recording_' + new Date().toISOString().replace(/[:.]/g, '-') + '.' + ext;
+
+    await analyzeRecording(blob, fileName);
+  };
+
+  // Start
+  isRecording = true;
+  recordingStartTime = Date.now();
+  recordBtn.textContent = '⏺ 录音中';
+  recordBtn.classList.add('recording');
+  recordHint.textContent = '录音中… ' + recordDuration + ' 秒';
+  recordHint.classList.add('recording');
+  recordWaveform.classList.add('active');
+
+  // Visual waveform animation
+  startWaveformAnimation();
+
+  mediaRecorder.start(100); // dataavailable every 100ms
+
+  // ★ 使用绝对时间计时 (后台标签页定时器被节流也能正确停止)
+  (function _scheduleRecordingCheck() {
+    if (!isRecording) return;
+    const elapsed = (Date.now() - recordingStartTime) / 1000;
+    const remaining = Math.max(0, recordDuration - elapsed);
+    if (remaining > 0) {
+      recordHint.textContent = '录音中… 剩余 ' + Math.ceil(remaining) + ' 秒';
+      // 使用 setTimeout 链式调度 (比 setInterval 更稳健)
+      // 检查间隔: 200ms (前台) — 后台会被节流但 Date.now() 补偿
+      setTimeout(_scheduleRecordingCheck, remaining < 1 ? 50 : 200);
+    } else {
+      stopRecording();
+    }
+  })();
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  recordBtn.textContent = '分析中…';
+  recordBtn.classList.remove('recording');
+  recordBtn.classList.add('analyzing');
+  recordHint.textContent = '正在发送到后端分析…';
+  recordHint.classList.remove('recording');
+  recordHint.classList.add('analyzing');
+  recordWaveform.classList.remove('active');
+  stopWaveformAnimation();
+  // Release Wake Lock early on manual stop (also done in onstop handler)
+  if (wakeLock) {
+    wakeLock.release().catch(() => {});
+    wakeLock = null;
+  }
+}
+
+async function analyzeRecording(blob, fileName) {
+  isAnalyzing = true;
+  const formData = new FormData();
+  formData.append('file', blob, fileName);
+
+  try {
+    const resp = await fetch(getApiUrl(), { method: 'POST', body: formData });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error('Server ' + resp.status + ': ' + text.slice(0, 200));
+    }
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    addResult({
+      type: recordMode,
+      source: 'recording',
+      timestamp: Date.now(),
+      data: data,
+      fileName: fileName,
+    });
+
+    // 循环模式不切换页面, 保持在录音 Tab 继续采集
+    if (!recordLoop) switchTab('results');
+
+  } catch(err) {
+    showToast(err.message || '录音分析失败');
+  } finally {
+    isAnalyzing = false;
+    recordBtn.textContent = '开始录音';
+    recordBtn.classList.remove('analyzing');
+    recordHint.textContent = '点击上方按钮，录制 ' + recordDuration + ' 秒音频';
+    recordHint.classList.remove('analyzing');
+  }
+
+  // ★ 循环录音: 800ms 后自动续录
+  if (recordLoop && backendOnline) {
+    if (loopTimer) { clearTimeout(loopTimer); loopTimer = null; }
+    loopTimer = setTimeout(() => _scheduleLoopRestart(), 800);
+  }
+}
+
+function _scheduleLoopRestart() {
+  if (!recordLoop || !backendOnline) return;
+  if (isRecording || isAnalyzing) return;
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+  console.log('[循环] 启动下一轮录音');
+  startRecording();
+}
+
+// ★ Waveform animation (real AnalyserNode data when available, random fallback)
+let wfAnimId = null;
+let wfDataArray = null;
+
+function startWaveformAnimation() {
+  const bars = recordWaveform.querySelectorAll('.wf-bar');
+  const barCount = bars.length;
+
+  if (analyserNode) {
+    // 真实波形: 从 AnalyserNode 读取时域数据
+    const bufferLen = analyserNode.frequencyBinCount;
+    wfDataArray = new Uint8Array(bufferLen);
+  }
+
+  function animate() {
+    if (!isRecording) return;
+    if (analyserNode && wfDataArray) {
+      // ★ 真实音频波形
+      analyserNode.getByteTimeDomainData(wfDataArray);
+      const step = Math.floor(wfDataArray.length / barCount);
+      for (let i = 0; i < barCount; i++) {
+        // 将 0-255 映射到 4-56px (128 为中心)
+        const val = wfDataArray[i * step];
+        const normalized = Math.abs(val - 128) / 128; // 0-1
+        const h = 4 + normalized * 52;
+        bars[i].style.height = h + 'px';
+      }
+    } else {
+      // 降级: 随机动画
+      bars.forEach(bar => {
+        const h = 4 + Math.random() * 56;
+        bar.style.height = h + 'px';
+      });
+    }
+    wfAnimId = requestAnimationFrame(animate);
+  }
+  animate();
+}
+function stopWaveformAnimation() {
+  if (wfAnimId) {
+    cancelAnimationFrame(wfAnimId);
+    wfAnimId = null;
+  }
+  wfDataArray = null;
+  const bars = recordWaveform.querySelectorAll('.wf-bar');
+  bars.forEach(bar => { bar.style.height = '4px'; });
+  // 清理 AudioContext
+  if (audioCtx) {
+    audioCtx.close().catch(() => {});
+    audioCtx = null; analyserNode = null;
+  }
+}
+
+// ============================================================
+// Results Management
+// ============================================================
+function addResult(result) {
+  analysisResults.unshift(result);
+  if (analysisResults.length > 50) analysisResults.pop();
+}
+
+function renderResults() {
+  if (analysisResults.length === 0) {
+    resultsList.innerHTML = `
+      <div class="results-empty">
+        <div class="results-empty-icon">◈</div>
+        <div class="results-empty-text">
+          暂无分析结果<br>
+          <span style="color:var(--text-muted);font-size:12px;">上传文件或录制音频后将在此显示</span>
+        </div>
+      </div>`;
+    return;
+  }
+
+  resultsList.innerHTML = analysisResults.map((r, idx) => {
+    const d = r.data;
+    const isOmni = r.type === 'omni';
+    const cnMap = CLASS_CN;
+    const colorMap = CLASS_COLORS;
+
+    if (isOmni) {
+      const emotionCn = d.emotion_cn || d.emotion || '--';
+      const dangerLevel = d.danger_level || '正常';
+      const dangerClass = DANGER_CLASS[dangerLevel] || 'safe';
+      const dangerIcon = { '危险':'🔴', '关注':'🟡', '正常':'🟢' }[dangerLevel] || '⚪';
+      const time = new Date(r.timestamp).toLocaleTimeString('zh-CN', { hour12: false });
+
+      return `
+        <div class="result-card ${dangerClass}" data-idx="${idx}">
+          <div class="result-emoji">${dangerIcon}</div>
+          <div class="result-info">
+            <div class="result-label ${dangerClass}">${escapeHtml(emotionCn)} · ${dangerLevel}</div>
+            <div class="result-meta">
+              <span>${time}</span>
+              <span>置信度 ${((d.emotion_confidence || 0) * 100).toFixed(0)}%</span>
+              <span>${(d.duration_sec || 0).toFixed(1)}s</span>
+            </div>
+          </div>
+          <span class="result-source omni">☁ Omni</span>
+        </div>`;
+    } else {
+      // CNN
+      const dominant = d.dominant_emotion || 'normal';
+      const isAbnormal = dominant !== 'normal' && dominant !== 'silence';
+      const dangerClass = isAbnormal ? 'danger' : 'safe';
+      const time = new Date(r.timestamp).toLocaleTimeString('zh-CN', { hour12: false });
+
+      return `
+        <div class="result-card ${dangerClass}" data-idx="${idx}">
+          <div class="result-emoji">${isAbnormal ? '⚠' : '✓'}</div>
+          <div class="result-info">
+            <div class="result-label ${dangerClass}">${cnMap[dominant] || dominant}</div>
+            <div class="result-meta">
+              <span>${time}</span>
+              <span>置信度 ${((d.confidence || 0) * 100).toFixed(0)}%</span>
+              <span>${d.total_windows || 0} 窗口</span>
+              <span>${(d.duration_sec || 0).toFixed(1)}s</span>
+            </div>
+          </div>
+          <span class="result-source cnn">⚡ CNN</span>
+        </div>`;
+    }
+  }).join('');
+
+  // Click to expand detail
+  resultsList.querySelectorAll('.result-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = parseInt(card.dataset.idx);
+      toggleDetail(card, idx);
+    });
+    card.style.cursor = 'pointer';
+  });
+}
+
+function toggleDetail(card, idx) {
+  const existing = card.querySelector('.result-detail');
+  if (existing) {
+    existing.classList.toggle('open');
+    return;
+  }
+
+  const r = analysisResults[idx];
+  if (!r) return;
+  const d = r.data;
+  const isOmni = r.type === 'omni';
+
+  let detailHtml = '';
+  if (isOmni) {
+    const keywordsHtml = (d.keywords && d.keywords.length > 0)
+      ? `<div class="detail-item full"><div class="detail-label">敏感词</div><div class="keyword-tags">${d.keywords.map(k => '<span class="keyword-tag">' + escapeHtml(k) + '</span>').join('')}</div></div>`
+      : '';
+    detailHtml = `
+      <div class="detail-grid">
+        <div class="detail-item full">
+          <div class="detail-label">语音转写</div>
+          <div class="detail-value transcript">${escapeHtml(d.text || '(未检测到语音)')}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">语气描述</div>
+          <div class="detail-value">${escapeHtml(d.tone_description || '--')}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">危险评分</div>
+          <div class="detail-value">${(d.danger_score || 0).toFixed(2)}</div>
+        </div>
+        <div class="detail-item full">
+          <div class="detail-label">判定理由</div>
+          <div class="detail-value">${escapeHtml(d.reason || '--')}</div>
+        </div>
+        ${keywordsHtml}
+        <div class="detail-item full">
+          <div class="detail-label">文件</div>
+          <div class="detail-value" style="font-family:var(--font-mono);font-size:12px;">${escapeHtml(r.fileName || '--')}</div>
+        </div>
+      </div>`;
+  } else {
+    const dist = d.emotion_distribution || {};
+    const classNames = ['normal', 'scream', 'cry', 'laugh', 'silence'];
+    const barsHtml = classNames.map(cls => {
+      const val = dist[cls] || 0;
+      return `<div class="class-bar-row">
+        <span class="class-bar-label">${CLASS_CN[cls]}</span>
+        <div class="class-bar-track"><div class="class-bar-fill" style="width:${val*100}%;background:${CLASS_COLORS[cls]}"></div></div>
+        <span class="class-bar-val">${(val*100).toFixed(0)}%</span>
+      </div>`;
+    }).join('');
+
+    detailHtml = `
+      <div class="detail-grid">
+        <div class="detail-item full">
+          <div class="detail-label">情绪分布</div>
+          <div class="class-bars">${barsHtml}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">分析模式</div>
+          <div class="detail-value">滑动窗口 (1s / 0.5s步长)</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">分析窗口数</div>
+          <div class="detail-value">${d.total_windows || 0} 个</div>
+        </div>
+        <div class="detail-item full">
+          <div class="detail-label">文件</div>
+          <div class="detail-value" style="font-family:var(--font-mono);font-size:12px;">${escapeHtml(r.fileName || '--')}</div>
+        </div>
+        ${d.summary ? `<div class="detail-item full"><div class="detail-value" style="color:var(--text-secondary);">${escapeHtml(d.summary)}</div></div>` : ''}
+      </div>`;
+  }
+
+  const detailDiv = document.createElement('div');
+  detailDiv.className = 'result-detail open';
+  const inner = document.createElement('div');
+  inner.innerHTML = detailHtml;
+  detailDiv.appendChild(inner);
+  card.appendChild(detailDiv);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Clear results
+$('#clear-results').addEventListener('click', (e) => {
+  e.preventDefault();
+  analysisResults = [];
+  if (currentTab === 'results') renderResults();
+});
+
+// ============================================================
+// Keyboard Shortcuts
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  // Ctrl+1/2/3 to switch tabs
+  if (e.ctrlKey && e.key === '1') { e.preventDefault(); switchTab('upload'); }
+  if (e.ctrlKey && e.key === '2') { e.preventDefault(); switchTab('record'); }
+  if (e.ctrlKey && e.key === '3') { e.preventDefault(); switchTab('results'); }
+  // Space to start/stop recording (when on record tab)
+  if (e.key === ' ' && currentTab === 'record' && !isRecording && !isAnalyzing) {
+    e.preventDefault();
+    startRecording();
+  }
+});
+
+// Paste file
+document.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.kind === 'file') {
+      const file = item.getAsFile();
+      if (file.type.startsWith('audio/') || /\.(wav|mp3|flac|m4a|ogg|aac|webm)$/i.test(file.name)) {
+        e.preventDefault();
+        handleFile(file);
+        return;
+      }
+    }
+  }
+});
+
+// ============================================================
+// Init
+// ============================================================
+updateApiUrlDisplay();
+// ★ 初始化 drop zone 空闲呼吸动画
+dropZone.classList.add('idle');
+console.log('◈ 音频采集前端面板已就绪');
+console.log('  后端 API: ' + API_BASE + getEndpoint());
+console.log('  快捷键: Ctrl+1/2/3 切换标签, 空格 开始录音');
+console.log('  配置后端: 点击右上角齿轮图标 或 访问 ?backend=IP:端口');
+console.log('  后台录音: ✅ 支持 (绝对时间计时 + AudioContext 自动恢复 + Wake Lock)');
+
+// ★ 页面关闭/隐藏时释放资源
+window.addEventListener('pagehide', () => {
+  if (wakeLock) {
+    wakeLock.release().catch(() => {});
+    wakeLock = null;
+  }
+});
+window.addEventListener('beforeunload', () => {
+  if (wakeLock) {
+    wakeLock.release().catch(() => {});
+    wakeLock = null;
+  }
+});
+</script>
+</body>
+</html>

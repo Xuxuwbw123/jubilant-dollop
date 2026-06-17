@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nocturne-style Audio Panel</title>
+    <style>
+        :root {
+            --primary-purple: #8b5cf6;
+            --primary-pink: #ec4899;
+            --light-bg: #f9fafb;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景装饰 */
+        .bg-decoration {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.05) 70%, transparent 100%);
+            z-index: -1;
+        }
+        .bg-decoration.top-right { top: -100px; right: -100px; }
+        .bg-decoration.bottom-left { bottom: -100px; left: -100px; }
+
+        /* 头部标题 */
+        .header {
+            margin-bottom: 4rem;
+        }
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .header h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+        .header .desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 500px;
+            line-height: 1.6;
+        }
+
+        /* 胶囊式导航 */
+        .tabs {
+            display: inline-flex;
+            background: #f3f4f6;
+            border-radius: 9999px;
+            padding: 0.25rem;
+            margin-bottom: 3rem;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* 主内容区 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        /* 卡片组件 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+        }
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* 录音按钮 */
+        .record-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 4rem 0;
+        }
+        .record-btn {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-purple), var(--primary-pink));
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+        .record-btn::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+            z-index: -1;
+        }
+        .record-btn:hover {
+            transform: scale(1.05);
+        }
+        .record-status {
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* 上传区域 */
+        .upload-area {
+            border: 2px dashed #e5e7eb;
+            border-radius: 1.5rem;
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+            top: -50px;
+            right: -50px;
+            z-index: 0;
+        }
+        .upload-area .content {
+            position: relative;
+            z-index: 1;
+        }
+        .upload-area h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .upload-area p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            .record-btn {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration top-right"></div>
+    <div class="bg-decoration bottom-left"></div>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="subtitle">Sleep, Reimagined</div>
+            <h1>Nocturne</h1>
+            <p class="desc">An AI dream companion that learns how you rest — and gently rebuilds your nights.</p>
+        </div>
+
+        <!-- 导航标签 -->
+        <div class="tabs">
+            <button class="tab-btn active">Record</button>
+            <button class="tab-btn">File</button>
+            <button class="tab-btn">Omni</button>
+            <button class="tab-btn">Settings</button>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="main-grid">
+            <!-- 录音模块 -->
+            <div class="card">
+                <h3>Live Recording</h3>
+                <p>Start capturing audio with your microphone. Supports loop recording for continuous monitoring.</p>
+            </div>
+
+            <!-- 文件模块 -->
+            <div class="card">
+                <h3>File Analysis</h3>
+                <p>Upload or drag-and-drop audio files (wav/mp3/mp4) for offline analysis.</p>
+            </div>
+
+            <!-- Omni模块 -->
+            <div class="card">
+                <h3>Omni Agent</h3>
+                <p>Switch to Qwen3.5-Omni-Flash for enhanced multi-modal analysis.</p>
+            </div>
+        </div>
+
+        <!-- 录音按钮 -->
+        <div class="record-section">
+            <button class="record-btn" id="recordBtn">●</button>
+            <div class="record-status" id="recordStatus">Click to start recording</div>
+        </div>
+
+        <!-- 上传区域 -->
+        <div class="upload-area">
+            <div class="content">
+                <h4>Drop your audio file here</h4>
+                <p>Supports WAV, MP3, MP4 and more</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单交互示例
+        const recordBtn = document.getElementById('recordBtn');
+        const recordStatus = document.getElementById('recordStatus');
+        let isRecording = false;
+
+        recordBtn.addEventListener('click', () => {
+            isRecording = !isRecording;
+            if (isRecording) {
+                recordBtn.style.background = 'linear-gradient(135deg, #ef4444, #f97316)';
+                recordStatus.textContent = 'Recording...';
+            } else {
+                recordBtn.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+                recordStatus.textContent = 'Click to start recording';
+            }
+        });
+
+        // Tab切换
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
