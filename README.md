@@ -4,8 +4,6 @@
 
 基于深度学习的实时人声监测系统，通过前端麦克风采集音频，经 WebSocket 传输至后端进行 **双通路分析**：**emotion2vec**（预训练语音情绪模型 + FC 分类头，4 类本地推理）和 **Qwen3.5-Omni-Flash**（全模态大模型直接分析语音情绪），实现对异常人声的实时监测和三级报警。
 
-**当前状态**: ✅ emotion2vec 模型 (Val F1=0.867) | ✅ Omni 智能体已集成 | ✅ 双后端可用 (main.py + server_headless.py) | ✅ 文件分析 API | ✅ HTML 前端面板
-
 ## 系统架构
 
 ```
@@ -94,12 +92,6 @@
 │   ├── best_model_e2v.pt      # ★ 当前最佳模型 (emotion2vec, Val F1=0.867)
 │   ├── best_model_v4_20e_f1_0593.pt  # CNN v4 最佳模型 (保留备选)
 │   └── test_report_e2v.json   # emotion2vec 测试集评估报告
-├── data/                # 训练数据集 (4类: normal/scream/cry/laugh)
-│   ├── normal/   cry/   scream/   laugh/
-│   ├── embeddings/             # 预提取的768维嵌入 (.npy)
-│   └── splits/                 # train/val/test 划分文件
-├── recordings/          # 录音文件保存目录
-├── 测试用例/            # 真实录音测试文件
 ├── config.yaml          # 全局配置
 ├── requirements.txt     # Python 依赖
 ├── start_backend.bat    # 后端一键启动
